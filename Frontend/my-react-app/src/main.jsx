@@ -17,7 +17,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/policies" element={<Policies />} />
         <Route path="/login" element={<Login />} />
         <Route path="/pdfUpload" element={<PdfUpload />} />
-        <Route path="/pdfView/*" element={<PdfView />} />
+        <Route path="/pdfView/:pdfPath" element={<PdfView />} />
       </Routes>
     </Router>
   </React.StrictMode>

@@ -4,12 +4,14 @@ import Header from '../Components/header';
 import Footer from '../Components/footer';
 import PdfComp from '../Components/pdfComp';
 import { pdfjs } from 'react-pdf'; // Import the PdfComp component
+import { useNavigate } from 'react-router-dom';
 
 const Policies = () => {
   const [categories, setCategories] = useState([]);
   const [pdfs, setPdfs] = useState([]);
-  const [selectedPdf, setSelectedPdf] = useState(null); // To store the selected PDF file path
+  const [selectedPdf] = useState(null); // To store the selected PDF file path
   const pdfViewerRef = useRef(null); // To scroll to PDF viewer
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -45,10 +47,9 @@ const Policies = () => {
     return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
   };
 
-  // Function to handle clicking on a PDF link
   const handlePdfClick = (filePath) => {
-    setSelectedPdf(`http://localhost:5000/${filePath}`); // Set the selected PDF
-    pdfViewerRef.current?.scrollIntoView({ behavior: 'smooth' }); // Scroll to the PDF viewer
+    const encodedFilePath = encodeURIComponent(filePath); // Encode the file path
+    navigate(`/pdfView/${encodedFilePath}`); // Navigate to the new page
   };
 
   return (
@@ -70,12 +71,12 @@ const Policies = () => {
                     .map(pdf => (
                       <li key={pdf._id} className="mb-2">
                         {/* Triggering the custom PDF viewer instead of a new tab */}
-                        <button 
+                        <a 
                           onClick={() => handlePdfClick(pdf.filePath)} 
                           className="text-blue-500 hover:underline"
                         >
                           {pdf.pdfName}
-                        </button>
+                        </a>
                         <p className="text-gray-600 inline-block ml-8"> - { pdf.pdfDescription}</p>
                         <p className="text-gray-600 inline-block ml-24">{formatDate(pdf.date)}</p>
                       </li>

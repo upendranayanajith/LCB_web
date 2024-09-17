@@ -24,7 +24,9 @@ const pdfSchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    default: Date.now 
+    default: function() {
+      return new Date(); // Set the date to now when document is created
+    }
   }
 });
 
