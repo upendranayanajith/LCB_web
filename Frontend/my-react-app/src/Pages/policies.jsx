@@ -1,18 +1,20 @@
 import axios from 'axios';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Header from '../Components/header';
 import Footer from '../Components/footer';
+import PdfComp from '../Components/pdfComp';
+import { pdfjs } from 'react-pdf'; // Import the PdfComp component
 
 const Policies = () => {
   const [categories, setCategories] = useState([]);
   const [pdfs, setPdfs] = useState([]);
+  const [selectedPdf, setSelectedPdf] = useState(null); // To store the selected PDF file path
+  const pdfViewerRef = useRef(null); // To scroll to PDF viewer
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        console.log('Fetching categories...');
         const response = await axios.get('http://localhost:5000/api/categories');
-        console.log('Categories fetched:', response.data);
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -21,9 +23,7 @@ const Policies = () => {
 
     const fetchPdfs = async () => {
       try {
-        console.log('Fetching PDFs...');
         const response = await axios.get('http://localhost:5000/api/pdfs');
-        console.log('PDFs fetched:', response.data);
         setPdfs(response.data);
       } catch (error) {
         console.error('Error fetching PDFs:', error);
@@ -34,13 +34,21 @@ const Policies = () => {
     fetchPdfs();
   }, []);
 
-  // Function to format the date
+
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    "pdfjs-dist/build/pdf.worker.min.js",
+    import.meta.url
+  ).toString();
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); 
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+  };
+
+  // Function to handle clicking on a PDF link
+  const handlePdfClick = (filePath) => {
+    setSelectedPdf(`http://localhost:5000/${filePath}`); // Set the selected PDF
+    pdfViewerRef.current?.scrollIntoView({ behavior: 'smooth' }); // Scroll to the PDF viewer
   };
 
   return (
@@ -61,10 +69,13 @@ const Policies = () => {
                     .filter(pdf => pdf.subCategory === category.categoryName)
                     .map(pdf => (
                       <li key={pdf._id} className="mb-2">
-                        {/* Linking to the correct file path on the server */}
-                        <a href={`http://localhost:5000/${pdf.filePath}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                        {/* Triggering the custom PDF viewer instead of a new tab */}
+                        <button 
+                          onClick={() => handlePdfClick(pdf.filePath)} 
+                          className="text-blue-500 hover:underline"
+                        >
                           {pdf.pdfName}
-                        </a>
+                        </button>
                         <p className="text-gray-600 inline-block ml-8"> - { pdf.pdfDescription}</p>
                         <p className="text-gray-600 inline-block ml-24">{formatDate(pdf.date)}</p>
                       </li>
@@ -75,6 +86,19 @@ const Policies = () => {
           </div>
         </main>
       </div>
+      
+      {/* PDF Viewer Section */}
+      <div ref={pdfViewerRef} className="pdf-viewer-container p-12">
+        {selectedPdf ? (
+          <>
+            <h3 className="text-2xl font-bold mb-4">Selected PDF:</h3>
+            <PdfComp pdfFile={selectedPdf} />
+          </>
+        ) : (
+          <p>No PDF selected. Click a PDF to view it here.</p>
+        )}
+      </div>
+
       <Footer />
     </div>
   );

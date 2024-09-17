@@ -32,7 +32,7 @@ const Home = () => {
 
       <div
         className="flex flex-1 flex-col sm:flex-row bg-cover bg-center"
-        style={{ backgroundImage: "url('../assets/bg_img.svg')" }}
+        // style={{ backgroundImage: "url('../assets/bg_img.svg')" }}
       >
         {/* <Sidebar /> */}
         <main className="flex-1 p-24">
