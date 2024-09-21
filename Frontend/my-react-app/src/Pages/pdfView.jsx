@@ -1,30 +1,33 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import PdfComp from '../Components/pdfComp';
+import axios from 'axios';
 
 const PdfView = () => {
   const { pdfPath } = useParams();
-  const decodedPath = decodeURIComponent(pdfPath); // Decode the file path
+  const decodedPath = decodeURIComponent(pdfPath);
   const [pdfName, setPdfName] = useState('');
-  const [loading, setLoading] = useState(true); // To handle loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Function to fetch PDF details from the database
     const fetchPdfDetails = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/pdfs?path=${decodedPath}`);
-        const data = await response.json();
-        console.log('API Response:', data); // Log the response to check the structure
+        const response = await axios.get(`http://localhost:5000/api/pdfs/`, {
+          params: { path: decodedPath }
+        });
+        console.log('API Response:', response.data);
 
-        if (data && data.pdfName) {
-          setPdfName(data.pdfName); // Set the pdfName from the response
+        if (response.data && response.data.pdfName) {
+          setPdfName(response.data.pdfName);
         } else {
           console.error('pdfName not found in response');
+          setPdfName('PDF Name Not Found');
         }
       } catch (error) {
         console.error('Error fetching PDF details:', error);
+        setPdfName('Error Loading PDF Name');
       } finally {
-        setLoading(false); // Set loading to false after fetching
+        setLoading(false);
       }
     };
 
@@ -34,11 +37,13 @@ const PdfView = () => {
   return (
     <div className="pdf-viewer">
       {loading ? (
-        <p>Loading...</p> // Display a loading message while fetching the PDF name
+        <p>Loading...</p>
       ) : (
-        <h1 className="text-2xl font-bold mb-6">{pdfName || 'PDF Name Not Found'}</h1> // Display the PDF name or a fallback
+        <PdfComp 
+          pdfFile={`http://localhost:5000/${decodedPath}`} 
+          pdfName={pdfName}
+        />
       )}
-      <PdfComp pdfFile={`http://localhost:5000/${decodedPath}`} /> {/* Pass the full URL */}
     </div>
   );
 };

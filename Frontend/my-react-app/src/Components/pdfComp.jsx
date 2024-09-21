@@ -1,14 +1,15 @@
+
+// PdfComp.js
 import { useState, useEffect, useRef } from "react";
 import { Document, Page } from "react-pdf";
 import PropTypes from 'prop-types';
 
-function PdfComp(props) {
+function PdfComp({ pdfFile, pdfName }) {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(1.5); // Larger default scale
+  const [scale, setScale] = useState(1.5);
   const pdfContainerRef = useRef(null);
 
-  // Disable right-click context menu
   useEffect(() => {
     const handleContextMenu = (e) => {
       e.preventDefault();
@@ -42,8 +43,18 @@ function PdfComp(props) {
     const value = e.target.value;
     const page = parseInt(value, 10);
 
-    if (!isNaN(page) && page > 0 && page <= numPages) {
+    if (value === "") {
+      setPageNumber("");
+    } else if (!isNaN(page) && page > 0 && page <= numPages) {
       setPageNumber(page);
+    }
+  };
+
+  const handlePageInputBlur = () => {
+    if (pageNumber === "" || pageNumber < 1) {
+      setPageNumber(1);
+    } else if (pageNumber > numPages) {
+      setPageNumber(numPages);
     }
   };
 
@@ -61,9 +72,8 @@ function PdfComp(props) {
 
   return (
     <div className="h-screen flex flex-col items-center bg-gray-50 text-gray-700">
-      {/* Static PDF Title (Fixed Header) */}
       <div className="fixed top-0 left-0 w-full bg-white shadow-md z-10 py-4 px-6">
-        <h2 className="text-lg font-semibold mb-2">{props.pdfName}</h2>
+        <h2 className="text-lg font-semibold mb-2">{pdfName}</h2>
 
         <div className="flex items-center justify-center space-x-4">
           <button 
@@ -81,11 +91,10 @@ function PdfComp(props) {
           <div className="flex items-center space-x-2">
             <p>Page</p>
             <input
-              type="number"
+              type="text"
               value={pageNumber}
               onChange={handlePageInput}
-              min={1}
-              max={numPages}
+              onBlur={handlePageInputBlur}
               className="border border-gray-300 rounded px-2 py-1 w-16 text-center bg-blue-200"
             />
             <p>of {numPages}</p>
@@ -107,13 +116,12 @@ function PdfComp(props) {
         </div>
       </div>
 
-      {/* Scrollable PDF Content */}
       <div 
         className="flex-1 overflow-y-scroll mt-24 w-full max-w-4xl px-6 py-8"
         ref={pdfContainerRef}
       >
         <Document
-          file={props.pdfFile}
+          file={pdfFile}
           onLoadSuccess={onDocumentLoadSuccess}
           className="shadow-lg rounded-lg"
         >
