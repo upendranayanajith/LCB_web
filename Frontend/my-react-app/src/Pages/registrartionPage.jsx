@@ -1,252 +1,264 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Header from '../Components/headerAdmin';
 import Footer from '../Components/footer';
 
 const RegistrationPage = () => {
-  const [users, setUsers] = useState([]);
-  const [newUser, setNewUser] = useState({
-    employeeName: '',
-    department: '',
-    jobRole: '',
-    userName: '',
-    password: '',
-  });
-  const [newCategory, setNewCategory] = useState({
-    categoryName: '',
-    description: '',
-  });
-  const [alert, setAlert] = useState(null);
+  const [empName, setEmpName] = useState('');
+  const [empRole, setEmpRole] = useState('');
+  const [empUserName, setEmpUserName] = useState('');
+  const [empPassword, setEmpPassword] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [userRoles] = useState(['Admin', 'Manager']);
+
+  const [categoryName, setCategoryName] = useState('');
+  const [categoryDescription, setCategoryDescription] = useState('');
+
+  const [userLogs, setUserLogs] = useState([]);
+  
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleEmployeeSubmit = async (e) => {
+    e.preventDefault();
+    setSuccessMessage('');
+    setErrorMessage('');
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/users', {
+        name: empName,
+        department: selectedCategory,
+        role: empRole,
+        username: empUserName,
+        password: empPassword,
+      });
+
+      if (response.status === 201) {
+        setSuccessMessage('Employee registered successfully!');
+        setEmpName('');
+        setEmpRole('');
+        setEmpUserName('');
+        setEmpPassword('');
+        setSelectedCategory('');
+      } else {
+        setErrorMessage('Failed to register employee.');
+      }
+    } catch (error) {
+      setErrorMessage(`Error: ${error.response?.data || error.message}`);
+    }
+  };
+
+  const handleCategorySubmit = async (e) => {
+    e.preventDefault();
+    if (!categoryName || !categoryDescription) {
+      setErrorMessage('Both fields are required');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/categories', {
+        name: categoryName,
+        description: categoryDescription,
+      });
+
+      if (response.status === 201 || response.status === 200) {
+        setSuccessMessage('Category added successfully!');
+        setCategoryName('');
+        setCategoryDescription('');
+      } else {
+        setErrorMessage('Failed to add category. Please try again.');
+      }
+    } catch (error) {
+      setErrorMessage('Error adding category. Please try again.');
+    }
+  };
+
+  const fetchUserLogs = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/userLogs');
+      if (response.status === 200) {
+        setUserLogs(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching user logs', error);
+    }
+  };
 
   useEffect(() => {
-    fetchUsers();
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/categories');
+        setCategories(response.data);
+      } catch (error) {
+        console.error('Error fetching categories', error);
+      }
+    };
+    fetchCategories();
   }, []);
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('/api/users');
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      showAlert('Error fetching users. Please try again.', 'error');
-    }
-  };
-
-  const handleUserInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewUser((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleCategoryInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewCategory((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const addUser = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newUser),
-      });
-      if (response.ok) {
-        showAlert('User added successfully!', 'success');
-        setNewUser({
-          employeeName: '',
-          department: '',
-          jobRole: '',
-          userName: '',
-          password: '',
-        });
-        fetchUsers();
-      } else {
-        showAlert('Failed to add user. Please try again.', 'error');
-      }
-    } catch (error) {
-      console.error('Error adding user:', error);
-      showAlert('Error adding user. Please try again.', 'error');
-    }
-  };
-
-  const addCategory = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('/api/categories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newCategory),
-      });
-      if (response.ok) {
-        showAlert('Category added successfully!', 'success');
-        setNewCategory({ categoryName: '', description: '' });
-      } else {
-        showAlert('Failed to add category. Please try again.', 'error');
-      }
-    } catch (error) {
-      console.error('Error adding category:', error);
-      showAlert('Error adding category. Please try again.', 'error');
-    }
-  };
-
-  const showAlert = (message, type) => {
-    setAlert({ message, type });
-    setTimeout(() => setAlert(null), 5000);
-  };
-
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-gray-100">
       <Header />
+      <main className="container mx-auto px-4 py-8">
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="p-6">
+            <h1 className="text-3xl font-bold mb-12 text-blue-900 text-center ">Admin Dashboard</h1>
+            
+            <div className="grid md:grid-cols-2 gap-24">
+              {/* Employee Registration Form */}
+              <div>
+                <h2 className="text-xl font-semibold mb-4 text-blue-800">Employee Registration</h2>
+                <form onSubmit={handleEmployeeSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Employee Name</label>
+                    <input
+                      type="text"
+                      value={empName}
+                      onChange={(e) => setEmpName(e.target.value)}
+                      placeholder="Enter employee name"
+                      className="mt-1 block w-full px-3 py-2 border border-blue-300 rounded-md shadow-sm focus:ring-blue-300 focus:border-blue-500 bg-blue-100 text-blue-800 placeholder-blue-400"
+                     required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Department</label>
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-blue-300 rounded-md shadow-sm focus:ring-blue-300 focus:border-blue-500 bg-blue-100 text-blue-800 placeholder-blue-400"
+                      
+                      required
+                    >
+                      <option value="">Select a department</option>
+                      {categories.map((category) => (
+                        <option key={category._id} value={category.categoryName}>
+                          {category.categoryName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Role</label>
+                    <select
+                      value={empRole}
+                      onChange={(e) => setEmpRole(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-blue-300 rounded-md shadow-sm focus:ring-blue-300 focus:border-blue-500 bg-blue-100 text-blue-800 placeholder-blue-400"
+                     required
+                    >
+                      <option value="">Select a role</option>
+                      {userRoles.map((role) => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Username</label>
+                    <input
+                      type="text"
+                      value={empUserName}
+                      onChange={(e) => setEmpUserName(e.target.value)}
+                      placeholder="Enter username"
+                      className="mt-1 block w-full px-3 py-2 border border-blue-300 rounded-md shadow-sm focus:ring-blue-300 focus:border-blue-500 bg-blue-100 text-blue-800 placeholder-blue-400"
+                     required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Password</label>
+                    <input
+                      type="password"
+                      value={empPassword}
+                      onChange={(e) => setEmpPassword(e.target.value)}
+                      placeholder="Enter password"
+                      className="mt-1 block w-full px-3 py-2 border border-blue-300 rounded-md shadow-sm focus:ring-blue-300 focus:border-blue-500 bg-blue-100 text-blue-800 placeholder-blue-400"
+                     required
+                    />
+                  </div>
+                  <div>
+                    <button
+                      type="submit"
+                      className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      Register Employee
+                    </button>
+                  </div>
+                </form>
+              </div>
 
-      <div className="container mx-auto p-6">
-        {alert && (
-          <div className={`mb-4 p-4 rounded ${alert.type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
-            {alert.message}
+              {/* Category Management Form */}
+              <div>
+                <h2 className="text-xl font-semibold mb-4 text-blue-800">Add Category</h2>
+                <form onSubmit={handleCategorySubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Category Name</label>
+                    <input
+                      type="text"
+                      value={categoryName}
+                      onChange={(e) => setCategoryName(e.target.value)}
+                      placeholder="Enter category name"
+                      className="mt-1 block w-full px-3 py-2 border border-blue-300 rounded-md shadow-sm focus:ring-blue-300 focus:border-blue-500 bg-blue-100 text-blue-800 placeholder-blue-400"
+                     required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Category Description</label>
+                    <textarea
+                      value={categoryDescription}
+                      onChange={(e) => setCategoryDescription(e.target.value)}
+                      placeholder="Enter category description"
+                      className="mt-1 block w-full px-3 py-2 border border-blue-300 rounded-md shadow-sm focus:ring-blue-300 focus:border-blue-500 bg-blue-100 text-blue-800 placeholder-blue-400"
+                     rows="4"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <button
+                      type="submit"
+                      className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 "
+                    >
+                      Add Category
+                    </button>
+                  </div>
+                </form>
+
+                {/* User Logs Section */}
+                <div className="mt-8">
+                  <h2 className="text-xl font-semibold mb-4 text-blue-800">User Logs</h2>
+                  <button 
+                    onClick={fetchUserLogs} 
+                    className="mb-4 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    View User Logs
+                  </button>
+                  {userLogs.length > 0 ? (
+                    <ul className="mt-4 space-y-2 max-h-60 overflow-y-auto">
+                      {userLogs.map((log, index) => (
+                        <li key={index} className="p-2 bg-gray-100 rounded-md text-sm">{log}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-600">No logs available.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Messages */}
+            {successMessage && (
+              <div className="mt-6 p-4 bg-green-100 text-green-700 rounded">
+                {successMessage}
+              </div>
+            )}
+            {errorMessage && (
+              <div className="mt-6 p-4 bg-red-100 text-red-700 rounded">
+                {errorMessage}
+              </div>
+            )}
           </div>
-        )}
-
-        <section className="mb-8 border-2 border-[#7c53a5] rounded">
-          <h2 className="text-2xl font-semibold text-[#7c53a5] mb-4">Add new User</h2>
-          <form onSubmit={addUser} className="blue-100-100 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-            <div className="mb-4">
-              <input
-                className="shadow appearance-none border border-blue-300  bg-blue-100 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                name="employeeName"
-                type="text"
-                placeholder="Employee Name *"
-                value={newUser.employeeName}
-                onChange={handleUserInputChange}
-                required
-              />
-            </div>
-            <div className="mb-4 flex">
-              <select
-                className="shadow appearance-none  bg-blue-100 border border-blue-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2"
-                name="department"
-                value={newUser.department}
-                onChange={handleUserInputChange}
-                required
-              >
-                <option value="">Select Department *</option>
-                <option value="HR">HR</option>
-                <option value="Finance">Finance</option>
-                <option value="IT">IT</option>
-              </select>
-              <select
-                className="shadow appearance-none border bg-blue-100 border-blue-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                name="jobRole"
-                value={newUser.jobRole}
-                onChange={handleUserInputChange}
-                required
-              >
-                <option value="">Select Job Role *</option>
-                <option value="Manager">Manager</option>
-                <option value="Developer">Developer</option>
-                <option value="Designer">Designer</option>
-              </select>
-            </div>
-            <div className="mb-4 flex">
-              <input
-                className="shadow appearance-none border border-blue-300 rounded bg-blue-100 w-full py-2 px-3 text--700 leading-tight focus:outline-none focus:shadow-outline mr-2"
-                name="userName"
-                type="text"
-                placeholder="User Name *"
-                value={newUser.userName}
-                onChange={handleUserInputChange}
-                required
-              />
-              <input
-                className="shadow appearance-none border bg-blue-100 border-blue-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                name="password"
-                type="password"
-                placeholder="Password *"
-                value={newUser.password}
-                onChange={handleUserInputChange}
-                required
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <button
-                className="bg-[#7c53a5] hover:bg-[#9a6ac8] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                type="submit"
-              >
-                ADD
-              </button>
-            </div>
-          </form>
-        </section>
-
-        <section className="mb-8 border-2 border-[#7c53a5] rounded">
-          <h2 className="text-2xl font-semibold text-[#7c53a5] mb-4">Add new Category</h2>
-          <form onSubmit={addCategory} className="blue-100-100 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-            <div className="mb-4 flex">
-              <input
-                className="shadow appearance-none border border-blue-300   bg-blue-100 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2"
-                name="categoryName"
-                type="text"
-                placeholder="Category Name"
-                value={newCategory.categoryName}
-                onChange={handleCategoryInputChange}
-                required
-              />
-              <input
-                className="shadow appearance-none border border-blue-300  bg-blue-100 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                name="description"
-                type="text"
-                placeholder="Description (optional)"
-                value={newCategory.description}
-                onChange={handleCategoryInputChange}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <button
-                className="bg-[#7c53a5] hover:bg-[#9a6ac8] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                type="submit"
-              >
-                ADD
-              </button>
-            </div>
-          </form>
-        </section>
-
-        <section className="border-2 border-[#7c53a5] rounded">
-          <h2 className="text-2xl font-semibold text-[#7c53a5] mb-4">Existing Users</h2>
-          <div className="blue-100-100 shadow-md rounded px-8 pt-6 pb-8 mb-4 overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="blue-100-200">
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Role</th>
-                  <th className="px-4 py-2 text-left">Dept</th>
-                  <th className="px-4 py-2 text-left">User Name</th>
-                  <th className="px-4 py-2 text-left">Password</th>
-                  <th className="px-4 py-2 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'blue-100-300' : 'blue-100-200'}>
-                    <td className="px-4 py-2">{user.employeeName}</td>
-                    <td className="px-4 py-2">{user.jobRole}</td>
-                    <td className="px-4 py-2">{user.department}</td>
-                    <td className="px-4 py-2">{user.userName}</td>
-                    <td className="px-4 py-2">*****</td>
-                    <td className="px-4 py-2">
-                      <button className="bg-[#7c53a5] hover:bg-[#9a6ac8] text-white font-bold py-1 px-2 rounded mr-2">
-                        Edit
-                      </button>
-                      <button className="bg-red-300 hover:bg-red-400 text-black font-bold py-1 px-2 rounded">
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </div>
-
+        </div>
+      </main>
       <Footer />
     </div>
   );

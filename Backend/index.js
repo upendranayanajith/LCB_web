@@ -2,8 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const uploadRoute = require('./routes/uploadPdf.routes');
+const uploadRoute = require('./Routes/uploadPdf.routes');
 const categoryRoutes = require('./Routes/category.routes');
+const userRoutes = require('./Routes/user.routes');
 const path = require('path');
 
 
@@ -42,6 +43,11 @@ app.use('/api', uploadRoute);
 
 // Use the category routes
 app.use('/api', categoryRoutes);
+
+
+
+// Use the user routes
+app.use('/api', userRoutes);
 
 
 // Serve static files from the 'uploads' folder
