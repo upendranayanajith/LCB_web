@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from '../Components/headerAdmin';
 import Footer from '../Components/footer';
@@ -69,6 +69,7 @@ const RegistrationPage = () => {
       } else {
         setErrorMessage('Failed to add category. Please try again.');
       }
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
       setErrorMessage('Error adding category. Please try again.');
     }

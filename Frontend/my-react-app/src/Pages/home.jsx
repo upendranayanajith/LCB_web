@@ -47,6 +47,7 @@ const Home = () => {
               buttonText="View"
               buttonColor="bg-blue-500"
               buttonTextColor="text-white"
+              onClick = {() => navigate('/circulars')}
             />
 
             
@@ -86,6 +87,7 @@ const Home = () => {
               buttonText="View"
               buttonColor="bg-blue-500"
               buttonTextColor="text-white"
+              onClick = {() => navigate('/tutorials')}
            />
             <Card
               icon={faFilePen}

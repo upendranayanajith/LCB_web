@@ -9,6 +9,8 @@ import PdfView from './Pages/pdfView.jsx';
 import RegistrationPage from './Pages/registrartionPage.jsx';
 import Application from './Pages/applications.jsx';
 import Login from './Pages/login.jsx';
+import Tutorial from './Pages/tutorials.jsx';
+import Circulars from './Pages/circulars.jsx';
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -22,6 +24,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/registration" element={<RegistrationPage />} />
         <Route path="/applications" element={<Application />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/tutorials" element={<Tutorial />} />
+        <Route path="/circulars" element={<Circulars />} />
       </Routes>
     </Router>
   </React.StrictMode>

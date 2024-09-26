@@ -1,24 +1,27 @@
-const UserModel = require('../Model/user.model');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken'); 
+const User = require('../Model/user.model'); // Assuming the user model is in the 'models' folder
 
-const { StatusCodes } = require('http-status-codes');
+class AuthController {
+  static async login(req, res) {
+    const { username, password, role } = req.body;
+    
+    try {
+      // Find the user by username and role
+      const user = await User.findOne({ username, role });
+      
+      // If user not found or password doesn't match
+      if (!user || user.password !== password) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
 
-const  login = async(req, res) => {
-const{username, password, userType} = req.body;
-await UserModel.findOne({username: username}) 
-.then(user=>{
-    if(user){
-        var username = user.username;
-        bcrypt.compare(password,user.password, async (err,response)=>{
-            if(response){
-              const token = jwt.sign({username: user.username, userType: user.userType},
-                "jwt-secret-key",{expiresIn: '1d'});
+      // If successful login
+      const token = 'dummyToken'; // Replace with actual token generation (e.g., JWT) later
+      return res.status(200).json({ message: 'Login successful', token });
+      
+    } catch (error) {
+      console.error('Error during login:', error);
+      return res.status(500).json({ message: 'Server error' });
+    }
+  }
+}
 
-                if(user.userType === 'admin'){
-                    res.status(StatusCodes.OK).json({message: 'Admin Logged in Successfully', token});
-                }else{
-                    res.status(StatusCodes.OK).json({message: 'User Logged in Successfully', token});
-                }
-        
-   
+module.exports = AuthController;
