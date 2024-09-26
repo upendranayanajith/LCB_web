@@ -23,9 +23,8 @@ const createUser = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     console.log('Fetching users...');
-    const users = await User.find({ status: true });
-    console.log('Users fetched:', users);
-    res.status(StatusCodes.OK).json({ users, count: users.length });
+    const users = await User.find();
+    res.status(200).json(users);
   } catch (err) {
     console.error('Error fetching users:', err);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error fetching users' });

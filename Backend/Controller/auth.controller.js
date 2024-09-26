@@ -1,21 +1,25 @@
-const User = require('../Model/user.model');
+const User = require('../Model/user.model'); // Assuming the user model is in the 'models' folder
 
 class AuthController {
   static async login(req, res) {
     const { username, password, role } = req.body;
-
+    
     try {
-      // Find user in the database matching username, password, and role
-      const user = await User.findOne({ username, password, role });
-
-      if (!user) {
+      // Find the user by username and role
+      const user = await User.findOne({ username, role });
+      
+      // If user not found or password doesn't match
+      if (!user || user.password !== password) {
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
-      // If user is found, return user data (excluding password)
-      res.json({ user: { username: user.username, role: user.role } });
+      // If successful login
+      const token = 'dummyToken'; // Replace with actual token generation (e.g., JWT) later
+      return res.status(200).json({ message: 'Login successful', token });
+      
     } catch (error) {
-      res.status(500).json({ message: 'Server error' });
+      console.error('Error during login:', error);
+      return res.status(500).json({ message: 'Server error' });
     }
   }
 }

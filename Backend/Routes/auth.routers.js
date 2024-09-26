@@ -1,11 +1,9 @@
 const express = require('express');
-const {createLogs, getLogs, getLogsById} = require('../Controller/auth.controller');
-
 const router = express.Router();
+const AuthController = require('../Controller/auth.controller'); // Assuming the controller is in the 'controllers' folder
 
-// Login Route
-router.post('/login', createLogs);
-router.get('/login', getLogs);
-router.get('/login/:id', getLogsById);
+// POST route for login
+router.post('/login', AuthController.login);
+// router.get('/login', AuthController.login);
 
 module.exports = router;

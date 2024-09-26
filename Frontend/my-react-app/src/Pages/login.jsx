@@ -14,25 +14,37 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMessage('');
-  
+
     try {
-      const response = await axios.post('http://localhost:5000/api/login', { username, password, role });
-      const { token } = response.data;
-      
-      // Store the token in localStorage or a more secure storage method
-      localStorage.setItem('token', token);
-  
-      // Redirect to home page or dashboard
-      navigate('/');
+        const response = await axios.post('http://localhost:5000/api/login', { username, password, role });
+        const { token } = response.data;
+
+        // Store the token in localStorage or a more secure storage method
+        localStorage.setItem('token', token);
+
+        // Redirect based on user role
+        if (role === 'Admin' || role === 'Manager') {
+            navigate('/pdfupload'); // Redirect to PDF upload for Admin/Manager
+        } else if (role === 'User') {
+            navigate('/'); // Redirect to home page for User
+        } else {
+            setErrorMessage('Unknown role. Please contact support.');
+        }
     } catch (error) {
-      console.error('Login error:', error);
-      if (error.response && error.response.status === 401) {
-        setErrorMessage('Invalid credentials');
-      } else {
-        setErrorMessage('An error occurred. Please try again.');
-      }
+        // Handle the error without logging to console
+        if (error.response) {
+            // Only set error message for known status
+            if (error.response.status === 401) {
+                setErrorMessage('Invalid credentials');
+            } else {
+                setErrorMessage('An error occurred. Please try again.');
+            }
+        } else {
+            // Handle any other error (like network issues)
+            setErrorMessage('Network error. Please check your connection.');
+        }
     }
-  };
+};
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -73,9 +85,9 @@ const LoginPage = () => {
                   required
                 >
                   <option value="">Select user type</option>
-                  <option value="admin">Admin</option>
-                  <option value="manager">Manager</option>
-                  <option value="user">User</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Manager">Manager</option>
+                  <option value="User">User</option>
                 </select>
               </div>
               <div>
