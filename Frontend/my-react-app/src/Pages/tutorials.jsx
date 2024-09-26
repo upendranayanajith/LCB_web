@@ -4,7 +4,7 @@ import Header from '../Components/header';
 import Footer from '../Components/footer';
 import CategoryCard from '../Components/pdfCard';
 
-const Circulars = () => {
+const Tutorials = () => {
   const [categories, setCategories] = useState([]);
   const [pdfs, setPdfs] = useState([]);
   const [searchQueries, setSearchQueries] = useState({});
@@ -22,7 +22,7 @@ const Circulars = () => {
     const fetchPdfs = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/pdfs');
-        const filteredPdfs = response.data.filter(pdf => pdf.category === 'Circulars');
+        const filteredPdfs = response.data.filter(pdf => pdf.category === 'Tutorials');
         setPdfs(filteredPdfs);
       } catch (error) {
         console.error('Error fetching PDFs:', error);
@@ -62,7 +62,7 @@ const Circulars = () => {
         style={{ backgroundImage: "url('../assets/bg_img.svg')" }}
       >
         <main className="flex-1 p-12">
-          <h1 className="text-3xl font-bold mb-6 text-gray-800">Circulars</h1>
+          <h1 className="text-3xl font-bold mb-6 text-gray-800">Tutorials</h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map(category => (
               <CategoryCard 
@@ -83,4 +83,4 @@ const Circulars = () => {
   );
 };
 
-export default Circulars;
+export default Tutorials;

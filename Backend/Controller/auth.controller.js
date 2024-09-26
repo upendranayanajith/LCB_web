@@ -1,24 +1,23 @@
-const UserModel = require('../Model/user.model');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken'); 
+const User = require('../Model/user.model');
 
-const { StatusCodes } = require('http-status-codes');
+class AuthController {
+  static async login(req, res) {
+    const { username, password, role } = req.body;
 
-const  login = async(req, res) => {
-const{username, password, userType} = req.body;
-await UserModel.findOne({username: username}) 
-.then(user=>{
-    if(user){
-        var username = user.username;
-        bcrypt.compare(password,user.password, async (err,response)=>{
-            if(response){
-              const token = jwt.sign({username: user.username, userType: user.userType},
-                "jwt-secret-key",{expiresIn: '1d'});
+    try {
+      // Find user in the database matching username, password, and role
+      const user = await User.findOne({ username, password, role });
 
-                if(user.userType === 'admin'){
-                    res.status(StatusCodes.OK).json({message: 'Admin Logged in Successfully', token});
-                }else{
-                    res.status(StatusCodes.OK).json({message: 'User Logged in Successfully', token});
-                }
-        
-   
+      if (!user) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      // If user is found, return user data (excluding password)
+      res.json({ user: { username: user.username, role: user.role } });
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  }
+}
+
+module.exports = AuthController;

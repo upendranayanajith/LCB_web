@@ -1,19 +1,8 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  department: {
-    type: String,
-    required: true,
-  },
-  role: {
-    type: String,
-    required: true,
-    enum: ['Admin', 'Manager','User'],
-  },
+  
+ 
   username: {
     type: String,
     required: true,
@@ -23,6 +12,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
+  role: {
+    type: String,
+    required: true,
+    enum: ['Admin', 'Manager','User'],
+  },
+
+
 });
 
 const User = mongoose.model('User', userSchema);
