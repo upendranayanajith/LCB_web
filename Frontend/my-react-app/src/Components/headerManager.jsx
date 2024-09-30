@@ -17,7 +17,8 @@ const Header = () => {
                 <span className="text-5xl font-bold font-moderno">LCB Finance PLC</span>
             </div>
             <nav className="flex space-x-32 justify-start w-full sm:w-auto pr-32">
-                <Link to="/home" className="text-white hover:text-purple-600">Home</Link>
+            <Link to="/homeManager" className="text-white hover:text-purple-600">Home</Link>
+            <Link to="/pdfuploadManager" className="text-white hover:text-purple-600">Upload Documents</Link>
                 <button 
                     onClick={handleLoginClick}
                     className="bg-[#A05C9B] hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
