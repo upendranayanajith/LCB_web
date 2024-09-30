@@ -71,3 +71,11 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+@font-face {
+  font-family: 'Museo Moderno';
+  src:url('fonts/MuseoModerno-VariableFont_wght.ttf') format('truetype'); /* Use 'truetype' instead of 'ttf' */
+  font-weight:500; /* You might want to specify actual weights if applicable */
+  font-style: normal; /* Change this to 'italic' for the italic font */
+}
+
