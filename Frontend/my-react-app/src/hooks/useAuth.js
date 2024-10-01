@@ -15,7 +15,7 @@ const useAuth = () => {
       }
 
       try {
-        const response = await axios.get('http://localhost:5000/api/verify-token', {
+        const response = await axios.get(`http://192.168.10.30:5000/api/verify-token`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.status !== 200) {

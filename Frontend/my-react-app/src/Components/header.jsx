@@ -2,6 +2,9 @@
 
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../src/assets/logo.png';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHome } from '@fortawesome/free-solid-svg-icons';
+
 
 const Header = () => {
     const navigate = useNavigate();
@@ -17,13 +20,14 @@ const Header = () => {
                 <span className="text-5xl font-bold font-moderno">LCB Finance PLC</span>
             </div>
             <nav className="flex space-x-32 justify-start w-full sm:w-auto pr-32">
-                <Link to="/home" className="text-white hover:text-purple-600">Home</Link>
-                <button 
-                    onClick={handleLoginClick}
-                    className="bg-[#A05C9B] hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-                >
-                    Log Out
-                </button>
+                {/* <Link to="/home" className="text-white hover:text-purple-600">Home</Link> */}
+
+
+                <Link to="/home" className="flex items-center text-white hover:text-purple-400">
+                <FontAwesomeIcon icon={faHome} className="mr-2" />
+</Link>
+
+                
             </nav>
         </header>
     );

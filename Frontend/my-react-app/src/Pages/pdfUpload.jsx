@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from '../Components/headerAdmin';
 import Footer from '../Components/footer';
@@ -11,10 +11,23 @@ const PdfUpload = () => {
   const [file, setFile] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [departments, setDepartments] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`http://192.168.10.30:5000/api/categories`);
+        setDepartments(response.data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted'); // Debug log
     setSuccessMessage('');
     setErrorMessage('');
 
@@ -31,20 +44,19 @@ const PdfUpload = () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/pdfupload', formData, {
+      const response = await axios.post(`http://192.168.10.30:5000/api/pdfupload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
-      console.log('Response received:', response); // Debug log
       if (response.status === 201 || response.status === 200) {
         setSuccessMessage('PDF uploaded successfully!');
         setPdfName('');
         setPdfDescription('');
         setCategory('');
         setSubCategory('');
-        setFile('');
+        setFile(null);
       } else {
         setErrorMessage('Failed to upload the PDF. Please try again.');
       }
@@ -55,9 +67,9 @@ const PdfUpload = () => {
   };
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <main className="flex-grow flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-xl w-full">
           <h1 className="text-2xl font-bold mb-4 text-blue-900">PDF Upload Component</h1>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -98,21 +110,19 @@ const PdfUpload = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Sub Category</label>
+              <label className="block text-sm font-medium text-gray-700">Department</label>
               <select
                 value={subCategory}
                 onChange={(e) => setSubCategory(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-100 text-gray-700"
+                className="mt-1 block w-full px-3 py-2 border border-blue-300 rounded-md shadow-sm focus:ring-blue-300 focus:border-blue-500 bg-blue-100 text-blue-800 placeholder-blue-400"
                 required
               >
-                <option value="" className="text-gray-500">Select a sub category</option>
-                <option value="HR">HR</option>
-                <option value="Finance">Finance</option>
-                <option value="Credit">Credit</option>
-                <option value="IT">IT</option>
-                <option value="Legal">Legal</option>
-                <option value="Operations">Operations</option>
-                <option value="Common">Common</option>
+                <option value="">Select a department</option>
+                {departments.map((department) => (
+                  <option key={department._id} value={department.categoryName}>
+                    {department.categoryName}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -145,9 +155,9 @@ const PdfUpload = () => {
             </div>
           )}
         </div>
-      </div>
+      </main>
       <Footer />
-    </>
+    </div>
   );
 };
 

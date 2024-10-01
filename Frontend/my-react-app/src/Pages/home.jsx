@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from "react";
 import Header from "../Components/header.jsx";
-// import Sidebar from '../Components/sidebar.jsx';
 import Card from "../Components/card.jsx";
 import Footer from "../Components/footer.jsx";
 

@@ -31,7 +31,7 @@ const PdfUpload = () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/pdfupload', formData, {
+      const response = await axios.post(`http://192.168.10.30:5000/api/pdfupload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

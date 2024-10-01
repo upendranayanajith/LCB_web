@@ -26,7 +26,7 @@ const RegistrationPage = () => {
     setErrorMessage('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/users', {
+      const response = await axios.post(`http://192.168.10.30:5000/api/users`, {
         name: empName,
         department: selectedCategory,
         role: empRole,
@@ -57,7 +57,7 @@ const RegistrationPage = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/categories', {
+      const response = await axios.post(`http://192.168.10.30:5000/api/categories`, {
         name: categoryName,
         description: categoryDescription,
       });
@@ -77,7 +77,7 @@ const RegistrationPage = () => {
 
   const fetchUserLogs = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/userLogs');
+      const response = await axios.get(`http://192.168.10.30:5000/api/userLogs`);
       if (response.status === 200) {
         setUserLogs(response.data);
       }
@@ -89,7 +89,7 @@ const RegistrationPage = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/categories');
+        const response = await axios.get(`http://192.168.10.30:5000/api/categories`);
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories', error);
@@ -99,9 +99,9 @@ const RegistrationPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Header />
-      <main className="container mx-auto px-4 py-8">
+    <div className="flex flex-col min-h-screen bg-gray-100">
+    <Header />
+    <main className="flex-grow container mx-auto px-4 py-8"> {/* Add flex-grow here */}
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-6">
             <h1 className="text-3xl font-bold mb-12 text-blue-900 text-center ">Admin Dashboard</h1>

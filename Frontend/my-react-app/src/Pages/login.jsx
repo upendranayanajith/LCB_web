@@ -9,25 +9,43 @@ import login_img from '../assets/login_page_img.png';
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [showLoginForm, setShowLoginForm] = useState(false);
   const navigate = useNavigate();
 
-  const handleAdminLogin = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMessage('');
 
-    try {
-      const response = await axios.post('http://localhost:5000/api/login', { username, password, role: 'Admin' });
-      const { token } = response.data;
+    if (!username || !password || !role) {
+      setErrorMessage('Please fill in all fields');
+      return;
+    }
 
-      localStorage.setItem('token', token);
-      navigate('/homeAdmin');
-    } catch (error) {
-      if (error.response && error.response.status === 401) {
-        setErrorMessage('Invalid credentials');
+    try {
+      const response = await axios.post(`http://192.168.10.30:5000/api/login`, { username, password, role });
+      
+      if (response.data && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userRole', role);
+
+        if (role === 'Admin') {
+          navigate('/homeAdmin');
+        } else if (role === 'Manager') {
+          navigate('/homeManager');
+        } else {
+          setErrorMessage('Invalid user role');
+        }
       } else {
-        setErrorMessage('An error occurred. Please try again.');
+        setErrorMessage('Login failed. Please check your credentials and role.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      if (error.response && error.response.status === 401) {
+        setErrorMessage('Invalid credentials or role. Please try again.');
+      } else {
+        setErrorMessage('An error occurred. Please try again later.');
       }
     }
   };
@@ -52,7 +70,7 @@ const LoginPage = () => {
             </div>
             <h1 className="text-6xl font-bold mb-4">INTRANET</h1>
             <p className="text-center mb-8">
-              Welcome to LCB Finance PLC&apos;s Document Handling Intranet. This platform is designed to streamline your document management process with ease and security. Select your user type to access, organize, and manage confidential documents efficiently, ensuring seamless collaboration across departments.
+              Welcome to LCB Finance PLC's Document Handling Intranet. This platform is designed to streamline your document management process with ease and security. Select your user type to access, organize, and manage confidential documents efficiently, ensuring seamless collaboration across departments.
             </p>
             <img src={login_img} style={{ width: '350px', height: 'auto' }} alt="Login" className="opacity-80" />
           </div>
@@ -73,14 +91,14 @@ const LoginPage = () => {
                     onClick={() => setShowLoginForm(true)}
                     className="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-[#A05C9B] hover:bg-[#8A4E84] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#A05C9B] transition duration-150 ease-in-out"
                   >
-                    Admin Login
+                    Admin/Manager Login
                   </button>
                 </div>
               </>
             ) : (
               <>
-                <h2 className="text-3xl font-bold mb-6 text-white">Admin Login</h2>
-                <form onSubmit={handleAdminLogin} className="space-y-4 w-full">
+                <h2 className="text-3xl font-bold mb-6 text-white">Admin/Manager Login</h2>
+                <form onSubmit={handleLogin} className="space-y-4 w-full">
                   <div>
                     <label className="block text-sm font-medium text-white">Username</label>
                     <input
@@ -104,6 +122,19 @@ const LoginPage = () => {
                     />
                   </div>
                   <div>
+                    <label className="block text-sm font-medium text-white">Role</label>
+                    <select
+                      value={role}
+                      onChange={(e) => setRole(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-[#A05C9B] rounded-md shadow-sm focus:ring-[#A05C9B] focus:border-[#A05C9B] bg-white text-[#146387]"
+                      required
+                    >
+                      <option value="">Select Role</option>
+                      <option value="Admin">Admin</option>
+                      <option value="Manager">Manager</option>
+                    </select>
+                  </div>
+                  <div>
                     <button
                       type="submit"
                       className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#0F4C81] hover:bg-[#0D3D66] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0F4C81] mt-4 transition duration-150 ease-in-out">
@@ -118,7 +149,7 @@ const LoginPage = () => {
                 )}
                 <button
                   onClick={() => setShowLoginForm(false)}
-                  className="mt-4 text-white hover:underline"
+                  className="mt-4 text-white bg-black hover:underline"
                 >
                   Back to User Selection
                 </button>

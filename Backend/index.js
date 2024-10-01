@@ -12,7 +12,7 @@ require('dotenv').config();
 const app = express(); // You missed this line in your provided code
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'http://192.168.10.30:443',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
 }));
@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB connection (consider using an environment variable for the connection string)
-mongoose.connect(process.env.MONGODB_URI || 'your_connection_string', {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
@@ -52,6 +52,9 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+const HOST = '192.168.10.30';
+
+
+app.listen(PORT, HOST, () => {
+  console.log(`Server is running on http://${HOST}:${PORT}`);
 });

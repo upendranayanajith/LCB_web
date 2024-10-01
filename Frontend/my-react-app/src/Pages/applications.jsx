@@ -12,7 +12,7 @@ const Applications = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/categories');
+        const response = await axios.get(`http://192.168.10.30:5000/api/categories`);
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -21,7 +21,7 @@ const Applications = () => {
 
     const fetchPdfs = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/pdfs');
+        const response = await axios.get(`http://192.168.10.30:5000/api/pdfs`);
         const filteredPdfs = response.data.filter(pdf => pdf.category === 'Applications');
         setPdfs(filteredPdfs);
       } catch (error) {
@@ -39,7 +39,7 @@ const Applications = () => {
   };
 
   const handlePdfClick = (filePath) => {
-    const fullPath = `http://localhost:5000/${filePath}`;
+    const fullPath = `http://192.168.10.30:5000/${filePath}`;
     window.open(fullPath, '_blank');
   };
 
