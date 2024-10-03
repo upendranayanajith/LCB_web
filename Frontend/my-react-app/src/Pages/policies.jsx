@@ -90,18 +90,8 @@ const Policies = () => {
         </main>
       </div>
       
-      {/* PDF Viewer Section */}
-      <div ref={pdfViewerRef} className="pdf-viewer-container p-12">
-        {selectedPdf ? (
-          <>
-            <h3 className="text-2xl font-bold mb-4">Selected PDF:</h3>
-            <PdfComp pdfFile={selectedPdf} />
-          </>
-        ) : (
-          <p>No PDF selected. Click a PDF to view it here.</p>
-        )}
-      </div>
-+
+      
+
       <Footer />
     </div>
   );

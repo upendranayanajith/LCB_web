@@ -13,6 +13,12 @@ class AuthController {
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
+  // Check if user's status is true
+  if (!user.status) {
+    return res.status(403).json({ message: 'Account is inactive. Please contact an administrator.' });
+  }
+
+
       // If successful login
       const token = 'dummyToken'; // Replace with actual token generation (e.g., JWT) later
       return res.status(200).json({ message: 'Login successful', token });

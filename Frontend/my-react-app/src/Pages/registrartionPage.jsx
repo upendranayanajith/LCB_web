@@ -16,6 +16,9 @@ const RegistrationPage = () => {
   const [categoryDescription, setCategoryDescription] = useState('');
 
   const [userLogs, setUserLogs] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
   
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -49,6 +52,16 @@ const RegistrationPage = () => {
     }
   };
 
+
+  const resetEmployeeForm = () => {
+    setEmpName('');
+    setEmpRole('');
+    setEmpUserName('');
+    setEmpPassword('');
+    setSelectedCategory('');
+  };
+
+
   const handleCategorySubmit = async (e) => {
     e.preventDefault();
     if (!categoryName || !categoryDescription) {
@@ -75,17 +88,54 @@ const RegistrationPage = () => {
     }
   };
 
-  const fetchUserLogs = async () => {
+
+  
+  const fetchUsers = async () => {
     try {
-      const response = await axios.get(`http://192.168.10.30:5000/api/userLogs`);
+      const response = await axios.get('http://192.168.10.30:5000/api/users');
       if (response.status === 200) {
-        setUserLogs(response.data);
+        setUsers(response.data);
+        setIsUserDialogOpen(true);
+      } else {
+        console.error('Unexpected response status:', response.status);
+        setErrorMessage('Failed to fetch users. Please try again.');
       }
     } catch (error) {
-      console.error('Error fetching user logs', error);
+      console.error('Error fetching users', error);
+      setErrorMessage('Failed to fetch users. Please try again.');
+    }
+  };
+  
+  const handleEditUser = (user) => {
+    setEditingUser({ ...user });
+  };
+
+  const handleUpdateUser = async () => {
+    try {
+      const response = await axios.put(`http://192.168.10.30:5000/api/users/${editingUser._id}`, editingUser);
+      if (response.status === 200) {
+        setSuccessMessage('User updated successfully!');
+        setEditingUser(null);
+        fetchUsers();
+      }
+    } catch (error) {
+      setErrorMessage('Failed to update user. Please try again.');
     }
   };
 
+  const handleDeleteUser = async (userId) => {
+    try {
+      const response = await axios.delete(`http://192.168.10.30:5000/api/users/${userId}`);
+      if (response.status === 200) {
+        setSuccessMessage('User deactivated successfully!');
+        // Refresh the user list after deactivation
+        fetchUsers();
+      }
+    } catch (error) {
+      setErrorMessage('Failed to deactivate user. Please try again.');
+    }
+  };
+  
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -224,27 +274,23 @@ const RegistrationPage = () => {
                   </div>
                 </form>
 
-                {/* User Logs Section */}
+                {/* User Handle Section */}
                 <div className="mt-8">
-                  <h2 className="text-xl font-semibold mb-4 text-blue-800">User Logs</h2>
+                  <h2 className="text-xl font-semibold mb-4 text-blue-800"> Manage users</h2>
                   <button 
-                    onClick={fetchUserLogs} 
+                    onClick={fetchUsers} 
                     className="mb-4 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
-                    View User Logs
+                    View 
                   </button>
-                  {userLogs.length > 0 ? (
-                    <ul className="mt-4 space-y-2 max-h-60 overflow-y-auto">
-                      {userLogs.map((log, index) => (
-                        <li key={index} className="p-2 bg-gray-100 rounded-md text-sm">{log}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-600">No logs available.</p>
-                  )}
+              
                 </div>
               </div>
             </div>
+  {/* User Management Section */}
+  <div className="mt-8">
+           
+          </div>
 
             {/* Messages */}
             {successMessage && (
@@ -257,6 +303,172 @@ const RegistrationPage = () => {
                 {errorMessage}
               </div>
             )}
+
+{/* User Management Dialog */}
+{isUserDialogOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg max-w-4xl w-full max-h-[80vh] overflow-auto">
+            <h2 className="text-2xl font-bold mb-4">User Management</h2>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="border p-2">Name</th>
+                  <th className="border p-2">Department</th>
+                  <th className="border p-2">Role</th>
+                  <th className="border p-2">Username</th>
+                  <th className="border p-2">Password</th>
+                  <th className="border p-2">Added Date</th>
+                  <th className="border p-2">Actions</th>
+                  
+                </tr>
+              </thead>
+              <tbody>
+  {users
+    .filter((user) => user.status === true) // Filter users with status === true
+    .map((user) => (
+      <tr key={user._id}>
+
+        <td className="border p-2">
+          {editingUser && editingUser._id === user._id ? (
+            <input
+              value={editingUser.name}
+              onChange={(e) =>
+                setEditingUser({ ...editingUser, name: e.target.value })
+              }
+              className="border p-1 w-full"
+            />
+          ) : (
+            user.name
+          )}
+        </td>
+
+
+        <td className="border p-2">
+          {editingUser && editingUser._id === user._id ? (
+            <select
+              value={editingUser.department}
+              onChange={(e) =>
+                setEditingUser({
+                  ...editingUser,
+                  department: e.target.value,
+                })
+              }
+              className="border p-1 w-full"
+            >
+              {categories.map((category) => (
+                <option key={category._id} value={category.categoryName}>
+                  {category.categoryName}
+                </option>
+              ))}
+            </select>
+          ) : (
+            user.department
+          )}
+        </td>
+
+
+
+        <td className="border p-2">
+          {editingUser && editingUser._id === user._id ? (
+            <select
+              value={editingUser.role}
+              onChange={(e) =>
+                setEditingUser({ ...editingUser, role: e.target.value })
+              }
+              className="border p-1 w-full"
+            >
+              {userRoles.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </select>
+          ) : (
+            user.role
+          )}
+        </td>
+
+
+
+        <td className="border p-2">
+          {editingUser && editingUser._id === user._id ? (
+            <input
+              value={editingUser.username}
+              onChange={(e) =>
+                setEditingUser({ ...editingUser, username: e.target.value })
+              }
+              className="border p-1 w-full"
+            />
+          ) : (
+            user.username
+          )}
+        </td>
+
+
+        <td className="border p-2">
+          {editingUser && editingUser._id === user._id ? (
+            <input
+              value={editingUser.password}
+              onChange={(e) =>
+                setEditingUser({ ...editingUser, password: e.target.value })
+              }
+              className="border p-1 w-full"
+            />
+          ) : (
+            user.password
+          )}
+        </td>
+
+
+        <td className="border p-2">
+  {new Date(user.createdOn).toLocaleDateString()} {/* Display date only */}
+</td>
+
+
+
+
+        <td className="border p-2">
+          {editingUser && editingUser._id === user._id ? (
+            <button
+              onClick={handleUpdateUser}
+              className="bg-green-500 text-white px-2 py-1 rounded mr-2"
+            >
+              Save
+            </button>
+          ) : (
+            <button
+              onClick={() => handleEditUser(user)}
+              className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
+            >
+              Edit
+            </button>
+          )}
+          <button
+            onClick={() => handleDeleteUser(user._id)}
+            className="bg-red-500 text-white px-2 py-1 rounded"
+          >
+            Delete
+          </button>
+        </td>
+
+
+
+      </tr>
+    ))}
+</tbody>
+
+            </table>
+            <button
+              onClick={() => setIsUserDialogOpen(false)}
+              className="mt-4 bg-gray-500 text-white px-4 py-2 rounded"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+
           </div>
         </div>
       </main>
@@ -266,3 +478,7 @@ const RegistrationPage = () => {
 };
 
 export default RegistrationPage;
+
+
+
+

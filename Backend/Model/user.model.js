@@ -23,6 +23,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
+  status: {
+    type: Boolean,
+    required: true,
+    default: true,
+  },
+
+  createdOn: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const User = mongoose.model('User', userSchema);

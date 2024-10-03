@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../AuthContext';  // Import useAuth hook
 import Footer from '../Components/footer';
 import bgImage from '../assets/bg_img.jpg';
 import logo from '../assets/logo.png';
@@ -13,6 +14,7 @@ const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [showLoginForm, setShowLoginForm] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();  // Use the login function from AuthContext
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -27,8 +29,7 @@ const LoginPage = () => {
       const response = await axios.post(`http://192.168.10.30:5000/api/login`, { username, password, role });
       
       if (response.data && response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userRole', role);
+        login(response.data.token, role);  // Use the login function from AuthContext
 
         if (role === 'Admin') {
           navigate('/homeAdmin');
