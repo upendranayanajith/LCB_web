@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const Pdf = require('../Model/pdf.model'); // Assuming you have a Pdf model defined
-const { viewPdfs, getAllPdfs, getPdfById } = require('../Controller/pdf.controller'); // Import the controller functions
+const { viewPdfs, getAllPdfs, getPdfById, updatePdf, deletePdf } = require('../Controller/pdf.controller'); // Import the controller functions
 
 
 const router = express.Router();
@@ -51,9 +51,9 @@ router.get('/pdfs', getAllPdfs);
 
 router.get('/pdfs/:id', getPdfById);
 
+router.put('/pdfs/:id', updatePdf)
 
-
-
+router.delete('/pdfs/:id', deletePdf);
 
 
 module.exports = router;

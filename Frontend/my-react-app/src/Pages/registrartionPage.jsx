@@ -2,6 +2,7 @@ import  { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from '../Components/headerAdmin';
 import Footer from '../Components/footer';
+import PDFManagement from '../Components/managePdf';
 
 const RegistrationPage = () => {
   const [empName, setEmpName] = useState('');
@@ -20,6 +21,8 @@ const RegistrationPage = () => {
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   
+  const [isPdfManagementOpen, setIsPdfManagementOpen] = useState(false);
+
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -276,14 +279,30 @@ const RegistrationPage = () => {
 
                 {/* User Handle Section */}
                 <div className="mt-8">
-                  <h2 className="text-xl font-semibold mb-4 text-blue-800"> Manage users</h2>
-                  <button 
+                <h2 className="text-xl font-semibold mb-4 text-blue-800">Manage Users and PDFs</h2>
+                <div className="flex space-x-4">
+
+                <button 
                     onClick={fetchUsers} 
                     className="mb-4 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
-                    View 
+                    Manage Users
                   </button>
-              
+
+
+                  <button 
+                    onClick={() => setIsPdfManagementOpen(true)} 
+                    className="mb-4 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                  >
+                    Manage PDFs
+                  </button>
+
+
+  {/* Buttons are placed inside this container */}
+</div>
+                  
+                  
+                
                 </div>
               </div>
             </div>
@@ -307,7 +326,7 @@ const RegistrationPage = () => {
 {/* User Management Dialog */}
 {isUserDialogOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg max-w-4xl w-full max-h-[80vh] overflow-auto">
+          <div className="bg-white p-6 rounded-lg max-w-7xl w-full max-h-[80vh] overflow-auto">
             <h2 className="text-2xl font-bold mb-4">User Management</h2>
             <table className="w-full border-collapse">
               <thead>
@@ -469,6 +488,12 @@ const RegistrationPage = () => {
       )}
 
 
+
+
+                <PDFManagement 
+              isOpen={isPdfManagementOpen}
+              onClose={() => setIsPdfManagementOpen(false)}
+            />
           </div>
         </div>
       </main>

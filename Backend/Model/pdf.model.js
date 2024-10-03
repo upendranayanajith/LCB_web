@@ -22,6 +22,12 @@ const pdfSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+
+pdfStatus: {
+    type: Boolean,
+    default: true
+  },
+
   date: {
     type: Date,
     default: function() {

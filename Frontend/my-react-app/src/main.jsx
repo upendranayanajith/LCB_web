@@ -18,6 +18,7 @@ import HomeAdmin from './Pages/homeAdmin.jsx';
 import HomeManager from './Pages/homeManager.jsx';
 import Userlogs from './Pages/userLogs.jsx';
 import Test from './Pages/test.jsx';
+import ManagePdf from './Components/managePdf.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -41,6 +42,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/homeAdmin" element={<ProtectedRoute allowedRoles={['Admin']}><HomeAdmin /></ProtectedRoute>} />
           <Route path="/homeManager" element={<ProtectedRoute allowedRoles={['Manager']}><HomeManager /></ProtectedRoute>} />
           <Route path="/userlogs" element={<ProtectedRoute allowedRoles={['Admin']}><Userlogs /></ProtectedRoute>} />
+          <Route path="/managePdf" element={<ProtectedRoute allowedRoles={['Admin', 'Manager']}><ManagePdf /></ProtectedRoute>} />
         </Routes>
       </Router>
     </AuthProvider>

@@ -22,7 +22,7 @@ const Tutorials = () => {
     const fetchPdfs = async () => {
       try {
         const response = await axios.get(`http://192.168.10.30:5000/api/pdfs`);
-        const filteredPdfs = response.data.filter(pdf => pdf.category === 'Tutorials');
+        const filteredPdfs = response.data.filter(pdf => pdf.category === 'Tutorials' && pdf.pdfStatus === true);
         setPdfs(filteredPdfs);
       } catch (error) {
         console.error('Error fetching PDFs:', error);

@@ -1,46 +1,48 @@
 const fs = require('fs');
+const { promisify } = require('util');
 const { join } = require('path');
 const Pdf = require('../Model/pdf.model');
-const express = require('express');
+const { StatusCodes } = require('http-status-codes');
 
-const router = express.Router();
+const unlinkAsync = promisify(fs.unlink);
 
 // Function to handle PDF upload
 const uploadPdf = async (req, res) => {
     try {
         if (!req.file) {
-            return res.status(400).send('No file uploaded.');
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: 'No file uploaded.' });
         }
 
         const { pdfName, pdfDescription, category, subCategory } = req.body;
-        const filePath = req.file.path; // Make sure this is stored correctly
+        const filePath = req.file.path;
 
         const newPdf = new Pdf({
             pdfName,
             pdfDescription,
             category,
             subCategory,
-            filePath
+            filePath,
+            pdfStatus: true // Assuming new PDFs are active by default
         });
 
-        await newPdf.save();
-        res.status(201).send('File uploaded and data saved successfully.');
+        const savedPdf = await newPdf.save();
+        console.log('PDF saved successfully:', savedPdf);
+        res.status(StatusCodes.CREATED).json({ message: 'File uploaded and data saved successfully.', pdf: savedPdf });
     } catch (error) {
         console.error('Error uploading file:', error);
-        res.status(500).send('Internal server error.');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error.', error: error.message });
     }
 };
 
-// Function to handle viewing a specific PDF file by PDF name (assuming the file is being stored with its original name)
+// Function to handle viewing a specific PDF file by PDF name
 const viewPdfs = (req, res) => {
-    const pdfName = req.params.pdfName; // Fetching PDF name from request parameters
-    const pdfPath = join(__dirname, '../uploads', pdfName); // Constructing the file path
+    const pdfName = req.params.pdfName;
+    const pdfPath = join(__dirname, '../uploads', pdfName);
 
-    // Check if file exists before sending
     if (fs.existsSync(pdfPath)) {
-        res.sendFile(pdfPath); // Serve the file
+        res.sendFile(pdfPath);
     } else {
-        res.status(404).send('PDF not found');
+        res.status(StatusCodes.NOT_FOUND).json({ message: 'PDF not found' });
     }
 };
 
@@ -48,10 +50,10 @@ const viewPdfs = (req, res) => {
 const getAllPdfs = async (req, res) => {
     try {
         const pdfs = await Pdf.find();
-        res.status(200).json(pdfs);
+        res.status(StatusCodes.OK).json(pdfs);
     } catch (error) {
         console.error('Error fetching PDFs:', error);
-        res.status(500).send('Internal server error.');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error.', error: error.message });
     }
 };
 
@@ -60,12 +62,65 @@ const getPdfById = async (req, res) => {
     try {
         const pdf = await Pdf.findById(req.params.id);
         if (!pdf) {
-            return res.status(404).send('PDF not found.');
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'PDF not found.' });
         }
-        res.status(200).json(pdf);
+        res.status(StatusCodes.OK).json(pdf);
     } catch (error) {
         console.error('Error fetching PDF:', error);
-        res.status(500).send('Internal server error.');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error.', error: error.message });
+    }
+};
+
+// Function to update a PDF
+const updatePdf = async (req, res) => {
+    const { id } = req.params;
+    console.log('Attempting to update PDF with id:', id);
+    console.log('Update data:', req.body);
+    try {
+        const pdf = await Pdf.findByIdAndUpdate(id, req.body, { 
+            new: true, 
+            runValidators: true 
+        });
+        if (!pdf) {
+            console.log('No PDF found with id:', id);
+            return res.status(StatusCodes.NOT_FOUND).json({ message: `No PDF with id: ${id}` });
+        }
+        console.log('PDF updated successfully:', pdf);
+        res.status(StatusCodes.OK).json(pdf);
+    } catch (error) {
+        console.error('Error updating PDF:', error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error updating PDF', error: error.message });
+    }
+};
+
+// Function to delete a PDF
+const deletePdf = async (req, res) => {
+    const { id } = req.params;
+    console.log('Attempting to delete PDF with id:', id);
+    try {
+        const pdf = await Pdf.findById(id);
+        if (!pdf) {
+            console.log('No PDF found with id:', id);
+            return res.status(StatusCodes.NOT_FOUND).json({ message: `No PDF with id: ${id}` });
+        }
+        
+        // Delete the file from the filesystem
+        try {
+            await unlinkAsync(pdf.filePath);
+            console.log('File deleted successfully from filesystem');
+        } catch (unlinkError) {
+            console.error('Error deleting file from filesystem:', unlinkError);
+            // Continue with deletion from database even if file deletion fails
+        }
+
+        // Remove the PDF document from the database
+        await Pdf.findByIdAndDelete(id);
+        
+        console.log('PDF deleted successfully');
+        res.status(StatusCodes.OK).json({ message: 'PDF deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting PDF:', error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error deleting PDF', error: error.message });
     }
 };
 
@@ -74,4 +129,6 @@ module.exports = {
     viewPdfs,
     getAllPdfs,
     getPdfById,
+    updatePdf,
+    deletePdf,
 };
