@@ -3,8 +3,10 @@ const { promisify } = require('util');
 const { join } = require('path');
 const Pdf = require('../Model/pdf.model');
 const { StatusCodes } = require('http-status-codes');
+const { sendEmail } = require('../emailServer');
 
 const unlinkAsync = promisify(fs.unlink);
+
 
 // Function to handle PDF upload
 const uploadPdf = async (req, res) => {
@@ -27,6 +29,12 @@ const uploadPdf = async (req, res) => {
 
         const savedPdf = await newPdf.save();
         console.log('PDF saved successfully:', savedPdf);
+
+         // Send email notification
+         const emailSubject = 'New Document Uploaded to Intranet';
+         const emailBody = `A new document "${savedPdf.pdfName}" has been uploaded to the intranet. This is for ${savedPdf.pdfDescription} in ${savedPdf.subCategory} of ${savedPdf.category}. Please refer to it.`;
+         await sendEmail(emailSubject, emailBody);
+
         res.status(StatusCodes.CREATED).json({ message: 'File uploaded and data saved successfully.', pdf: savedPdf });
     } catch (error) {
         console.error('Error uploading file:', error);

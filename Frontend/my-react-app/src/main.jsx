@@ -19,6 +19,8 @@ import HomeManager from './Pages/homeManager.jsx';
 import Userlogs from './Pages/userLogs.jsx';
 import Test from './Pages/test.jsx';
 import ManagePdf from './Components/managePdf.jsx';
+import ManagePhoneBook from './Pages/managePhoneBook.jsx';
+import PhoneBook from './Pages/phoneBook.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -34,7 +36,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/tutorials" element={<Tutorial />} />
           <Route path="/circulars" element={<Circulars />} />
           <Route path="/test" element={<Test />} />
-          
+          <Route path="/phoneBook" element={<PhoneBook />} />
+          <Route path="/managePhoneBook" element={<ManagePhoneBook />} />
+
+
           {/* Protected Routes */}
           <Route path="/pdfUpload" element={<ProtectedRoute allowedRoles={['Admin', 'Manager']}><PdfUpload /></ProtectedRoute>} />
           <Route path="/registration" element={<ProtectedRoute allowedRoles={['Admin']}><RegistrationPage /></ProtectedRoute>} />
@@ -43,6 +48,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/homeManager" element={<ProtectedRoute allowedRoles={['Manager']}><HomeManager /></ProtectedRoute>} />
           <Route path="/userlogs" element={<ProtectedRoute allowedRoles={['Admin']}><Userlogs /></ProtectedRoute>} />
           <Route path="/managePdf" element={<ProtectedRoute allowedRoles={['Admin', 'Manager']}><ManagePdf /></ProtectedRoute>} />
+          
         </Routes>
       </Router>
     </AuthProvider>

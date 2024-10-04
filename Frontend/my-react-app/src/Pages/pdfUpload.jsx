@@ -12,6 +12,7 @@ const PdfUpload = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [departments, setDepartments] = useState([]);
+  const [sendEmail, setSendEmail] = useState(true); 
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -52,6 +53,25 @@ const PdfUpload = () => {
 
       if (response.status === 201 || response.status === 200) {
         setSuccessMessage('PDF uploaded successfully!');
+
+if(sendEmail) {
+ // Send email notification
+ const emailSubject = `New ${category} Document Uploaded to Intranet`;
+ const emailBody = `A new document "${pdfName}" has been uploaded to the Intranet. This is for ${pdfDescription} in ${subCategory} of ${category}. Please refer to it: <a href="http://192.168.10.30:443/home">Click Here</a>.`;
+
+ 
+ try {
+   await axios.post(`http://192.168.10.30:5000/api/sendemail`, {
+     subject: emailSubject,
+     body: emailBody
+   });
+   console.log('Email notification sent successfully');
+ } catch (emailError) {
+   console.error('Error sending email notification:', emailError);
+ }
+
+}
+
         setPdfName('');
         setPdfDescription('');
         setCategory('');
@@ -135,7 +155,26 @@ const PdfUpload = () => {
                 required
               />
             </div>
-            <div>
+           
+           
+            <div className="flex items-center">
+  <input
+    type="checkbox"
+    id="send-email-checkbox"
+    checked={!sendEmail}
+    onChange={() => setSendEmail(!sendEmail)}
+    className="mr-2"
+  />
+  <label htmlFor="send-email-checkbox" className="text-sm text-gray-700">
+    Don't send an acknowledge mail
+  </label>
+</div>
+
+           
+           
+           
+           
+           <div>
               <button
                 type="submit"
                 className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
