@@ -11,7 +11,7 @@ const Header = () => {
     };
 
     return (
-        <header className="bg-[#146387] text-white p-4 flex flex-col sm:flex-row justify-between items-center w-full z-50 static top-0 left-0">
+        <header className="bg-[#1684a9] text-white p-4 flex flex-col sm:flex-row justify-between items-center w-full z-50 static top-0 left-0">
             <div className="flex items-center mb-4 sm:mb-0">
                 <img src={logo} alt="Company Logo" className="h-24 w-24 mr-2" />
                 <span className="text-5xl font-bold font-moderno">LCB Finance PLC</span>

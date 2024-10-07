@@ -1,7 +1,6 @@
-// PhonebookEntry.js
+const e = require('express');
 const mongoose = require('mongoose');
 
-// Define the Phonebook Entry schema
 const phonebookEntrySchema = new mongoose.Schema({
   name: {
     type: String,
@@ -13,31 +12,39 @@ const phonebookEntrySchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+
+branch: {
+    type: String,
+    required: true,
+   default: 'Head Office',
+   enum: ['Head Office', 'Galle','Matara','Kandy','Kurunegala','Jaffna','Kalmunai','Kegalle','Kuliyapitiya','Negombo','Panadura','Ratnapura'],
+  },
+
+  
   department: {
     type: String,
     required: true,
-   
   },
   extensionCode: {
     type: String,
     required: false,
-   
   },
   mobile: {
     type: String,
     required: true,
-    
   },
   email: {
     type: String,
     required: true,
- 
+  },
+  status: {
+    type: Boolean,
+    default: true
   }
 }, {
-  timestamps: true // Automatically create createdAt and updatedAt fields
+  timestamps: true
 });
 
-// Create the Phonebook Entry model
 const PhonebookEntry = mongoose.model('PhonebookEntry', phonebookEntrySchema);
 
 module.exports = PhonebookEntry;

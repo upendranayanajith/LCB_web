@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../AuthContext';  // Import useAuth hook
+import { useAuth } from '../AuthContext';
 import Footer from '../Components/footer';
 import bgImage from '../assets/bg_img.jpg';
 import logo from '../assets/logo.png';
 import login_img from '../assets/login_page_img.png';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -14,7 +16,7 @@ const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [showLoginForm, setShowLoginForm] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();  // Use the login function from AuthContext
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -29,7 +31,7 @@ const LoginPage = () => {
       const response = await axios.post(`http://192.168.10.30:5000/api/login`, { username, password, role });
       
       if (response.data && response.data.token) {
-        login(response.data.token, role);  // Use the login function from AuthContext
+        login(response.data.token, role);
 
         if (role === 'Admin') {
           navigate('/homeAdmin');
@@ -80,6 +82,12 @@ const LoginPage = () => {
           <div className="w-1/2 p-16 bg-gradient-to-br from-[#146387] to-[#A05C9B] flex flex-col items-center justify-center">
             {!showLoginForm ? (
               <>
+                {/* Avatar */}
+                <div className="mb-6">
+                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center">
+                    <FontAwesomeIcon icon={faUser} className="text-5xl text-[#146387]" />
+                  </div>
+                </div>
                 <h2 className="text-3xl font-bold mb-6 text-white">Select User Type</h2>
                 <div className="space-y-4 w-full">
                   <button

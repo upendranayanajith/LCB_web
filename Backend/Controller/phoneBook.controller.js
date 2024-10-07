@@ -1,8 +1,5 @@
-import PhonebookEntry, { find, findById, findByIdAndUpdate } from '../Model/phoneBook.model'; // Adjust the path as necessary
-import { Router } from 'express';
-import { StatusCodes } from 'http-status-codes';
-
-const router = Router();
+const PhonebookEntry = require('../Model/phoneBook.model'); // Corrected import
+const { StatusCodes } = require('http-status-codes');
 
 const createEntry = async (req, res) => {
   try {
@@ -11,7 +8,6 @@ const createEntry = async (req, res) => {
     res.status(StatusCodes.CREATED).json(newEntry);
   } catch (err) {
     if (err.code === 11000) {
-      // Duplicate key error (e.g., duplicate entry)
       return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Duplicate entry. Please use a different value.' });
     } else {
       console.error(err);
@@ -23,8 +19,8 @@ const createEntry = async (req, res) => {
 const getEntries = async (req, res) => {
   try {
     console.log('Fetching entries...');
-    const entries = await find();
-    res.status(200).json(entries);
+    const entries = await PhonebookEntry.find();
+    res.status(StatusCodes.OK).json(entries);
   } catch (err) {
     console.error('Error fetching entries:', err);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error fetching entries' });
@@ -33,11 +29,11 @@ const getEntries = async (req, res) => {
 
 const getEntryById = async (req, res) => {
   try {
-    const entry = await findById(req.params.id);
+    const entry = await PhonebookEntry.findById(req.params.id);
     if (!entry) {
       return res.status(StatusCodes.NOT_FOUND).json({ message: 'Entry not found.' });
     }
-    res.status(200).json(entry);
+    res.status(StatusCodes.OK).json(entry);
   } catch (error) {
     console.error('Error fetching entry:', error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error.' });
@@ -47,7 +43,7 @@ const getEntryById = async (req, res) => {
 const updateEntry = async (req, res) => {
   const { id } = req.params;
   try {
-    const entry = await findByIdAndUpdate(id, req.body, { 
+    const entry = await PhonebookEntry.findByIdAndUpdate(id, req.body, { 
       new: true, 
       runValidators: true 
     });
@@ -64,12 +60,11 @@ const updateEntry = async (req, res) => {
 const deleteEntry = async (req, res) => {
   const { id } = req.params;
   try {
-    const entry = await findById(id);
+    const entry = await PhonebookEntry.findById(id);
     if (!entry) {
       return res.status(StatusCodes.NOT_FOUND).json({ message: `No Entry with id: ${id}` });
     }
 
-    // Set the entry's status to false instead of deleting
     entry.status = false;
     await entry.save();
 
@@ -80,7 +75,7 @@ const deleteEntry = async (req, res) => {
   }
 };
 
-export default {
+module.exports = {
   createEntry,
   getEntries,
   getEntryById,
