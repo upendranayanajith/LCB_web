@@ -18,9 +18,7 @@ const CategoryCard = ({ category, pdfs, formatDate, handlePdfClick }) => {
     <div className="w-full border border-gray-300 rounded-lg p-4 mb-4 bg-gray-200 col-span-1">
       <div className="flex justify-between items-center mb-4">
         <h2
-          className="text-2xl font-semibold border-b-2 border-blue-500 pb-2 text-gray-700 cursor-pointer"
-          onClick={() => navigate(`/category/${category.id}`)}
-        >
+          className="text-2xl font-semibold border-b-2 border-blue-500 pb-2 text-gray-700">
           {category.categoryName}
         </h2>
         <div className="relative w-1/3">

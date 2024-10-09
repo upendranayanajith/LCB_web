@@ -17,10 +17,11 @@ import PdfUploadManager from './Pages/pdfUploadManager.jsx';
 import HomeAdmin from './Pages/homeAdmin.jsx';
 import HomeManager from './Pages/homeManager.jsx';
 import Userlogs from './Pages/userLogs.jsx';
-import Test from './Pages/test.jsx';
+
 import ManagePdf from './Components/managePdf.jsx';
 import ManagePhoneBook from './Pages/managePhoneBook.jsx';
 import PhoneBook from './Pages/phoneBook.jsx';
+import AdminReview from './Pages/adminReview.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -35,10 +36,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/applications" element={<Application />} />
           <Route path="/tutorials" element={<Tutorial />} />
           <Route path="/circulars" element={<Circulars />} />
-          <Route path="/test" element={<Test />} />
+    
+
+
           <Route path="/phoneBook" element={<PhoneBook />} />
           <Route path="/managePhoneBook" element={<ManagePhoneBook />} />
-
+<Route path="/adminReview" element={<AdminReview />} />
 
           {/* Protected Routes */}
           <Route path="/pdfUpload" element={<ProtectedRoute allowedRoles={['Admin', 'Manager']}><PdfUpload /></ProtectedRoute>} />

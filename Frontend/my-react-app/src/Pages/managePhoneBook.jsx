@@ -81,29 +81,40 @@ const PhonebookEntryForm = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [editingEntry, setEditingEntry] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-
+  const [isCustomDesignation, setIsCustomDesignation] = useState(false);
   const [departments, setDepartments] = useState([]);
   const [branches, setBranches] = useState([
-    'Head Office', 'Galle', 'Matara', 'Kandy', 'Kurunegala', 'Jaffna',
-    'Kalmunai', 'Kegalle', 'Kuliyapitiya', 'Negombo', 'Panadura', 'Ratnapura'
+    'Agunukolapelessa', 'Akuressa', 'Deiyandara', 'Embilipitiya', 'Galle', 'Gampaha', 'Head Office', 'Karandeniya', 'Karapitiya', 'Kegalle', 'Kohuwala',
+    'Kuliyapitiya', 'Matara', 'Maharagama', 'Negombo', 'Pelawaththa', 'Rathgama', 'Tangalle', 'Tissamaharama', 'Walasmulla'
   ]);
   const [designations, setDesignations] = useState([]);
+  const [presetDesignations] = useState([
+   
+
+'Board of Directors',  
+'Chief Executive Officer (CEO)',  
+'Chief Financial Officer (CFO)',  
+'Chief Operations Officer (COO)',  
+'Chief Marketing Officer (CMO)',  
+'Department Heads',  
+'Branch Managers',  
+'Regional Managers',  
+'Loan Officers',  
+'Customer Service Representatives',  
+'Data Analysts',  
+'Accountants',  
+'Field Officers',  
+'Community Mobilizers',  
+'Administrative Assistants',  
+'Interns/Trainees',
+
+
+  ]);
 
   useEffect(() => {
     fetchEntries();
     fetchDepartments();
-
   }, []);
-
-
-  useEffect(() => {
-    console.log('Departments state:', departments);
-  }, [departments]);
-
-
-  useEffect(() => {
-    console.log('Branches state:', branches);
-  }, [branches]);
 
   const fetchEntries = async () => {
     try {
@@ -139,6 +150,30 @@ const PhonebookEntryForm = () => {
     setFormData(prevData => ({
       ...prevData,
       [name]: value
+    }));
+  };
+
+  const handleDesignationChange = (e) => {
+    const value = e.target.value;
+    if (value === 'other') {
+      // If 'Other' is selected, don't clear the designation field
+      setFormData(prevData => ({
+        ...prevData,
+        designation: ''
+      }));
+    } else {
+      setFormData(prevData => ({
+        ...prevData,
+        designation: value
+      }));
+    }
+  };
+
+  const handleCustomDesignationChange = (e) => {
+    const value = e.target.value;
+    setFormData(prevData => ({
+      ...prevData,
+      designation: value
     }));
   };
 
@@ -179,54 +214,28 @@ const PhonebookEntryForm = () => {
     }
 
     try {
-      console.log('Submitting form data:', formData); // Log the form data being sent
-  
-      let response;
-      
-      // Check if we are editing an existing entry
       if (editingEntry) {
-          response = await axios.put(`http://192.168.10.30:5000/api/entries/${editingEntry.id}`, formData);
-          setSuccessMessage('Phonebook entry updated successfully!');
-          setEditingEntry(null); // Clear editing state
+        await axios.put(`http://192.168.10.30:5000/api/entries/${editingEntry.id}`, formData);
+        setSuccessMessage('Phonebook entry updated successfully!');
+        setEditingEntry(null);
       } else {
-          response = await axios.post('http://192.168.10.30:5000/api/entries', formData);
-          setSuccessMessage('Phonebook entry added successfully!');
+        await axios.post('http://192.168.10.30:5000/api/entries', formData);
+        setSuccessMessage('Phonebook entry added successfully!');
       }
-  
-      // Clear form data after submission
       setFormData({
-          name: '',
-          designation: '',
-          branch: '',
-          department: '',
-          extensionCode: '',
-          mobile: '',
-          email: '',
+        name: '',
+        designation: '',
+        branch: '',
+        department: '',
+        extensionCode: '',
+        mobile: '',
+        email: '',
       });
-  
-      // Refresh the entries list
-      fetchEntries(); 
-  
-  } catch (error) {
+      fetchEntries(); // Refresh the entries list
+    } catch (error) {
       console.error('Error saving entry:', error);
-  
-      // Improve error handling
-      if (error.response) {
-          // The request was made and the server responded with a status code
-          console.error('Response data:', error.response.data);
-          console.error('Response status:', error.response.status);
-          console.error('Response headers:', error.response.headers);
-          setErrorMessage(`Error: ${error.response.data.message || 'Failed to save entry. Please try again.'}`);
-      } else if (error.request) {
-          // The request was made but no response was received
-          console.error('Request data:', error.request);
-          setErrorMessage('No response from server. Please check your network connection.');
-      } else {
-          // Something happened in setting up the request
-          setErrorMessage('Failed to save entry. Please try again.');
-      }
-  }
-  
+      setErrorMessage('Failed to save entry. Please try again.');
+    }
   };
 
   const handleEdit = (entry) => {
@@ -271,23 +280,43 @@ const PhonebookEntryForm = () => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="designation" className="block text-sm font-medium text-gray-700">Designation *</label>
-                    <input
-                      type="text"
-                      id="designation"
-                      name="designation"
-                      value={formData.designation}
-                      onChange={(e) => handleCustomInput(e, designations, setDesignations)}
-                      required
-                      list="designationOptions"
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                    <datalist id="designationOptions">
-                      {designations.map((designation, index) => (
-                        <option key={index} value={designation} />
-                      ))}
-                    </datalist>
-                  </div>
+      <label htmlFor="designation" className="block text-sm font-medium text-gray-700">Designation *</label>
+      <select
+        id="designation"
+        name="designation"
+        value={formData.designation}
+        onChange={handleDesignationChange}
+        required
+        className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+      >
+        <option value="" disabled>Select a designation</option>
+        {presetDesignations.map((designation, index) => (
+          <option key={index} value={designation}>
+            {designation}
+          </option>
+        ))}
+        {designations
+          .filter(designation => !presetDesignations.includes(designation))
+          .map((designation, index) => (
+            <option key={`custom-${index}`} value={designation}>
+              {designation}
+            </option>
+          ))}
+        <option value="other">Other</option>
+      </select>
+      {formData.designation === 'other' && (
+        <input
+          type="text"
+          id="custom-designation"
+          name="custom-designation"
+          value={formData.designation}
+          onChange={handleCustomDesignationChange}
+          placeholder="Enter custom designation"
+          required
+          className="mt-2 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        />
+      )}
+    </div>
                   <div>
                     <label htmlFor="branch" className="block text-sm font-medium text-gray-700">Branch *</label>
                     <input
@@ -314,10 +343,14 @@ const PhonebookEntryForm = () => {
                       value={formData.department}
                       onChange={handleChange}
                       required
+
                       className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     >
-
+                      <option value="" disabled>
+                        Select a department
+                      </option>
                       {departments.map((department) => (
+
                         <option key={department._id} value={department.categoryName}>
                           {department.categoryName}
                         </option>
