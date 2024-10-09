@@ -1,14 +1,75 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
-import Header from '../Components/header';
+import Header from '../Components/headerAdmin';
 import Footer from '../Components/footer';
+
+const ViewEntriesPopup = ({ entries, isOpen, onClose, onEdit, onDelete }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center" id="my-modal">
+      <div className="relative top-20 mx-auto p-5 border w-4/5 max-w-7xl shadow-lg rounded-md bg-white">
+        <div className="mt-3 text-center">
+          <h3 className="text-lg leading-6 font-medium text-gray-900">Phonebook Entries</h3>
+          <div className="mt-2 px-7 py-3">
+            <div className="max-h-96 overflow-y-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Extension</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {entries.map((entry) => (
+                    <tr key={entry.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{entry.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.designation}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.branch}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.department}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.extensionCode}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.mobile}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onClick={() => onEdit(entry)} className="text-indigo-600 hover:text-indigo-900 mr-2">
+                          Edit
+                        </button>
+                        <button onClick={() => onDelete(entry.id)} className="text-red-600 hover:text-red-900">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div className="items-center px-4 py-3">
+          <button
+            id="ok-btn"
+            className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            onClick={onClose}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const PhonebookEntryForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     designation: '',
-    branch: 'Head Office',
+    branch: '',
     department: '',
     extensionCode: '',
     mobile: '',
@@ -18,32 +79,58 @@ const PhonebookEntryForm = () => {
   const [entries, setEntries] = useState([]);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [editingId, setEditingId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortColumn, setSortColumn] = useState('');
-  const [sortDirection, setSortDirection] = useState('asc');
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
-  const branchOptions = [
+  const [departments, setDepartments] = useState([]);
+  const [branches, setBranches] = useState([
     'Head Office', 'Galle', 'Matara', 'Kandy', 'Kurunegala', 'Jaffna',
     'Kalmunai', 'Kegalle', 'Kuliyapitiya', 'Negombo', 'Panadura', 'Ratnapura'
-  ];
+  ]);
+  const [designations, setDesignations] = useState([]);
 
   useEffect(() => {
     fetchEntries();
+    fetchDepartments();
+
   }, []);
+
+
+  useEffect(() => {
+    console.log('Departments state:', departments);
+  }, [departments]);
+
+
+  useEffect(() => {
+    console.log('Branches state:', branches);
+  }, [branches]);
 
   const fetchEntries = async () => {
     try {
       const response = await axios.get('http://192.168.10.30:5000/api/entries');
-      // Ensure each entry has an id
-      const entriesWithIds = response.data.map(entry => ({
+      const filteredEntries = response.data.filter(entry => entry.status === true);
+      const entriesWithIds = filteredEntries.map(entry => ({
         ...entry,
-        id: entry.id || entry._id // Assuming the server might use _id
+        id: entry.id || entry._id
       }));
       setEntries(entriesWithIds);
+
+      // Extract unique designations from entries
+      const uniqueDesignations = [...new Set(entriesWithIds.map(entry => entry.designation))];
+      setDesignations(uniqueDesignations);
     } catch (error) {
       console.error('Error fetching entries:', error);
       setErrorMessage('Failed to fetch entries. Please try again.');
+    }
+  };
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await axios.get('http://192.168.10.30:5000/api/categories');
+      setDepartments(response.data);
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+      setErrorMessage('Failed to fetch departments. Please try again.');
     }
   };
 
@@ -55,8 +142,19 @@ const PhonebookEntryForm = () => {
     }));
   };
 
+  const handleCustomInput = (e, field, setField) => {
+    const value = e.target.value;
+    if (!field.includes(value)) {
+      setField([...field, value]);
+    }
+    setFormData(prevData => ({
+      ...prevData,
+      [e.target.name]: value
+    }));
+  };
+
   const validateForm = (data) => {
-    if (!data.name || !data.designation || !data.department || !data.mobile || !data.email) {
+    if (!data.name || !data.designation || !data.branch || !data.department || !data.mobile || !data.email) {
       setErrorMessage('Please fill in all required fields.');
       return false;
     }
@@ -81,56 +179,64 @@ const PhonebookEntryForm = () => {
     }
 
     try {
-      const response = await axios.post('http://192.168.10.30:5000/api/entries', formData);
-      setSuccessMessage('Phonebook entry added successfully!');
-      setEntries([...entries, response.data]);
-      setFormData({
-        name: '',
-        designation: '',
-        branch: 'Head Office',
-        department: '',
-        extensionCode: '',
-        mobile: '',
-        email: '',
-      });
-    } catch (error) {
-      console.error('Error adding entry:', error);
-      setErrorMessage('Failed to add entry. Please try again.');
-    }
-  };
-
-  const handleEdit = (id) => {
-    setEditingId(id);
-  };
-
-  const handleSave = async (id, updatedData) => {
-    if (!validateForm(updatedData)) {
-      return;
-    }
-
-    try {
-      // Ensure id is not undefined
-      if (id === undefined) {
-        throw new Error('Entry ID is undefined');
+      console.log('Submitting form data:', formData); // Log the form data being sent
+  
+      let response;
+      
+      // Check if we are editing an existing entry
+      if (editingEntry) {
+          response = await axios.put(`http://192.168.10.30:5000/api/entries/${editingEntry.id}`, formData);
+          setSuccessMessage('Phonebook entry updated successfully!');
+          setEditingEntry(null); // Clear editing state
+      } else {
+          response = await axios.post('http://192.168.10.30:5000/api/entries', formData);
+          setSuccessMessage('Phonebook entry added successfully!');
       }
+  
+      // Clear form data after submission
+      setFormData({
+          name: '',
+          designation: '',
+          branch: '',
+          department: '',
+          extensionCode: '',
+          mobile: '',
+          email: '',
+      });
+  
+      // Refresh the entries list
+      fetchEntries(); 
+  
+  } catch (error) {
+      console.error('Error saving entry:', error);
+  
+      // Improve error handling
+      if (error.response) {
+          // The request was made and the server responded with a status code
+          console.error('Response data:', error.response.data);
+          console.error('Response status:', error.response.status);
+          console.error('Response headers:', error.response.headers);
+          setErrorMessage(`Error: ${error.response.data.message || 'Failed to save entry. Please try again.'}`);
+      } else if (error.request) {
+          // The request was made but no response was received
+          console.error('Request data:', error.request);
+          setErrorMessage('No response from server. Please check your network connection.');
+      } else {
+          // Something happened in setting up the request
+          setErrorMessage('Failed to save entry. Please try again.');
+      }
+  }
+  
+  };
 
-      await axios.put(`http://192.168.10.30:5000/api/entries/${id}`, updatedData);
-      setEntries(entries.map(entry => entry.id === id ? updatedData : entry));
-      setEditingId(null);
-      setSuccessMessage('Entry updated successfully!');
-    } catch (error) {
-      console.error('Error updating entry:', error);
-      setErrorMessage('Failed to update entry. Please try again.');
-    }
+  const handleEdit = (entry) => {
+    setEditingEntry(entry);
+    setFormData(entry);
+    setIsPopupOpen(false);
   };
 
   const handleDelete = async (id) => {
     try {
-
-      if (id === undefined) {
-        throw new Error('Entry ID is undefined');
-      }
-
       await axios.delete(`http://192.168.10.30:5000/api/entries/${id}`);
       setEntries(entries.filter(entry => entry.id !== id));
       setSuccessMessage('Entry deleted successfully!');
@@ -140,41 +246,6 @@ const PhonebookEntryForm = () => {
     }
   };
 
-  const handleCancelEdit = () => {
-    setEditingId(null);
-  };
-
-
-
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-  };
-
-  const handleSort = (column) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortColumn(column);
-      setSortDirection('asc');
-    }
-  };
-
-  const filteredEntries = entries.filter((entry) =>
-    entry.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.designation.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.branch.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.department.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const sortedEntries = [...filteredEntries].sort((a, b) => {
-    if (sortColumn) {
-      if (a[sortColumn] < b[sortColumn]) return sortDirection === 'asc' ? -1 : 1;
-      if (a[sortColumn] > b[sortColumn]) return sortDirection === 'asc' ? 1 : -1;
-    }
-    return 0;
-  });
-
-
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -182,7 +253,9 @@ const PhonebookEntryForm = () => {
         <div className="max-w-7xl mx-auto">
           <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
             <div className="px-4 py-5 sm:p-6">
-              <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Add Phonebook Entry</h2>
+              <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
+                {editingEntry ? 'Edit Phonebook Entry' : 'Add Phonebook Entry'}
+              </h2>
               <form onSubmit={handleSubmit} className="space-y-8">
                 <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
                   <div>
@@ -204,37 +277,52 @@ const PhonebookEntryForm = () => {
                       id="designation"
                       name="designation"
                       value={formData.designation}
-                      onChange={handleChange}
+                      onChange={(e) => handleCustomInput(e, designations, setDesignations)}
                       required
+                      list="designationOptions"
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     />
+                    <datalist id="designationOptions">
+                      {designations.map((designation, index) => (
+                        <option key={index} value={designation} />
+                      ))}
+                    </datalist>
                   </div>
                   <div>
                     <label htmlFor="branch" className="block text-sm font-medium text-gray-700">Branch *</label>
-                    <select
+                    <input
+                      type="text"
                       id="branch"
                       name="branch"
                       value={formData.branch}
-                      onChange={handleChange}
+                      onChange={(e) => handleCustomInput(e, branches, setBranches)}
                       required
-                      className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    >
-                      {branchOptions.map(branch => (
-                        <option key={branch} value={branch}>{branch}</option>
+                      list="branchOptions"
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                    <datalist id="branchOptions">
+                      {branches.map((branch, index) => (
+                        <option key={index} value={branch} />
                       ))}
-                    </select>
+                    </datalist>
                   </div>
                   <div>
                     <label htmlFor="department" className="block text-sm font-medium text-gray-700">Department *</label>
-                    <input
-                      type="text"
+                    <select
                       id="department"
                       name="department"
                       value={formData.department}
                       onChange={handleChange}
                       required
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
+                      className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+
+                      {departments.map((department) => (
+                        <option key={department._id} value={department.categoryName}>
+                          {department.categoryName}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label htmlFor="extensionCode" className="block text-sm font-medium text-gray-700">Extension Code</label>
@@ -258,7 +346,8 @@ const PhonebookEntryForm = () => {
                       required
                       pattern="\d{10}"
                       title="Please enter a valid 10-digit mobile number"
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+
                     />
                   </div>
                   <div className="sm:col-span-2">
@@ -279,10 +368,20 @@ const PhonebookEntryForm = () => {
                     type="submit"
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
-                    Add Entry
+                    {editingEntry ? 'Update Entry' : 'Add Entry'}
                   </button>
                 </div>
+
               </form>
+              <div className="mt-4">
+                <button
+                  onClick={() => setIsPopupOpen(true)}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  View Entries
+                </button>
+              </div>
+
               {successMessage && (
                 <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded text-center">
                   {successMessage}
@@ -296,138 +395,21 @@ const PhonebookEntryForm = () => {
             </div>
           </div>
 
-          {/* Phonebook Entries Table */}
           <div className="bg-white shadow-lg rounded-lg overflow-hidden">
             <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Phonebook Entries</h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Extension</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {entries.map((entry) => (
-                      <tr key={entry.id}>
-                        {editingId === entry.id ? (
-                          <>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <input
-                                type="text"
-                                value={entry.name}
-                                onChange={(e) => setEntries(entries.map(item => item.id === entry.id ? { ...item, name: e.target.value } : item))}
-                                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <input
-                                type="text"
-                                value={entry.designation}
-                                onChange={(e) => setEntries(entries.map(item => item.id === entry.id ? { ...item, designation: e.target.value } : item))}
-                                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <select
-                                value={entry.branch}
-                                onChange={(e) => setEntries(entries.map(item => item.id === entry.id ? { ...item, branch: e.target.value } : item))}
-                                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                              >
-                                {branchOptions.map(branch => (
-                                  <option key={branch} value={branch}>{branch}</option>
-                                ))}
-                              </select>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <input
-                                type="text"
-                                value={entry.department}
-                                onChange={(e) => setEntries(entries.map(item => item.id === entry.id ? { ...item, department: e.target.value } : item))}
 
 
-                                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <input
-                                type="text"
-                                value={entry.extensionCode}
-                                onChange={(e) => setEntries(entries.map(item => item.id === entry.id ? { ...item, extensionCode: e.target.value } : item))}
-                                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <input
-                                type="tel"
-                                value={entry.mobile}
-                                onChange={(e) => setEntries(entries.map(item => item.id === entry.id ? { ...item, mobile: e.target.value } : item))}
-                                pattern="\d{10}"
-                                title="Please enter a valid 10-digit mobile number"
-                                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <input
-                                type="email"
-                                value={entry.email}
-                                onChange={(e) => setEntries(entries.map(item => item.id === entry.id ? { ...item, email: e.target.value } : item))}
-                                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                              <button
-                                onClick={() => handleSave(entry.id, entry)}
-                                className="text-indigo-600 hover:text-indigo-900 mr-2"
-                              >
-                                Save
-                              </button>
-                              <button
-                                onClick={handleCancelEdit}
-                                className="text-gray-600 hover:text-gray-900"
-                              >
-                                Cancel
-                              </button>
-                            </td>
-                          </>
-                        ) : (
-                          <>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{entry.name}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.designation}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.branch}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.department}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.extensionCode}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.mobile}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.email}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                              <button
-                                onClick={() => handleEdit(entry.id)}
-                                className="text-indigo-600 hover:text-indigo-900 mr-2"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDelete(entry.id)}
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                Delete
-                              </button>
-                            </td>
-                          </>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="max-w-full overflow-x-auto">
+
               </div>
             </div>
+            <ViewEntriesPopup
+              entries={entries}
+              isOpen={isPopupOpen}
+              onClose={() => setIsPopupOpen(false)}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           </div>
         </div>
       </main>

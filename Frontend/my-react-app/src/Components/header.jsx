@@ -1,13 +1,13 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import logo from '../../src/assets/logo.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faAddressBook } from '@fortawesome/free-solid-svg-icons';
 
 const Header = () => {
     const navigate = useNavigate();
 
-    const handleLoginClick = () => {
-        navigate('/login');
+    const handleBackClick = () => {
+        navigate(-1);
     };
     
     return (
@@ -16,14 +16,21 @@ const Header = () => {
                 <img src={logo} alt="Company Logo" className="h-24 w-24 mr-2" />
                 <span className="text-5xl font-bold font-moderno">LCB Finance PLC</span>
             </div>
-            <nav className="flex space-x-32 justify-start w-full sm:w-auto pr-32">
-                <Link 
-                    to="/home" 
-                    className="flex items-center text-white hover:text-purple-400 bg-[#0F4C81] px-4 py-2 rounded-md transition duration-300 ease-in-out hover:bg-[#0D3D66]"
+            <nav className="flex space-x-4 justify-end w-full sm:w-auto">
+                <a 
+                    href="http://192.168.10.30:443/phonebook"
+                    className="flex items-center text-[#0F4C81] hover:text-white bg-white hover:bg-[#0F4C81] px-4 py-2 rounded-md transition duration-300 ease-in-out"
                 >
-                    <FontAwesomeIcon icon={faHome} className="mr-2" />
-                    <span>HOME</span>
-                </Link>
+                    <FontAwesomeIcon icon={faAddressBook} className="mr-2" />
+                    <span>PHONEBOOK</span>
+                </a>
+                <button 
+                    onClick={handleBackClick}
+                    className="flex items-center text-[#A05C9B] hover:text-white bg-white hover:bg-[#A05C9B] px-4 py-2 rounded-md transition duration-300 ease-in-out"
+                >
+                    <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+                    <span>BACK</span>
+                </button>
             </nav>
         </header>
     );
