@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
-const Pdf = require('../Model/pdf.model'); // Assuming you have a Pdf model defined
-const { viewPdfs, getAllPdfs, getPdfById, updatePdf, deletePdf } = require('../Controller/pdf.controller'); // Import the controller functions
+const Review = require('../Model/review.model'); // Assuming you have a Review model defined
+const { viewReviews, getAllReviews, getReviewById, updateReview, deleteReview } = require('../Controller/review.controller'); // Import the controller functions
 const path = require('path');
 const { send } = require('process');
 const { sendEmail } = require('../emailServer');
@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post('/pdfupload', upload.single('file'), async (req, res) => {
+router.post('/reviewupload', upload.single('file'), async (req, res) => {
   console.log('Headers:', req.headers);
   console.log('File:', req.file);
   console.log('Body:', req.body);
@@ -27,18 +27,18 @@ router.post('/pdfupload', upload.single('file'), async (req, res) => {
       return res.status(400).send('No file uploaded.');
     }
 
-    const { pdfName, pdfDescription, category, subCategory } = req.body;
+    const { reviewName, reviewDescription, category, subCategory } = req.body;
     const filePath = req.file.path;
 
-    const newPdf = new Pdf({
-      pdfName,
-      pdfDescription,
+    const newReview = new Review({
+      reviewName,
+      reviewDescription,
       category,
       subCategory,
       filePath
     });
 
-    await newPdf.save();
+    await newReview.save();
 
     res.status(201).send('File uploaded and data saved successfully.');
   } catch (error) {
@@ -60,9 +60,9 @@ router.post('/sendemail', async (req, res) => {
 });
 
 
-router.get('/pdfs', getAllPdfs);
-router.get('/pdfs/:id', getPdfById);
-router.put('/pdfs/:id', updatePdf)
-router.delete('/pdfs/:id', deletePdf);
+router.get('/reviews', getAllReviews);
+router.get('/reviews/:id', getReviewById);
+router.put('/reviews/:id', updateReview)
+router.delete('/reviews/:id', deleteReview);
 
 module.exports = router;

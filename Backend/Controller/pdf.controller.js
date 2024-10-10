@@ -7,14 +7,12 @@ const { sendEmail } = require('../emailServer');
 
 const unlinkAsync = promisify(fs.unlink);
 
-
 // Function to handle PDF upload
 const uploadPdf = async (req, res) => {
     try {
         if (!req.file) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: 'No file uploaded.' });
         }
-
         const { pdfName, pdfDescription, category, subCategory } = req.body;
         const filePath = req.file.path;
 
