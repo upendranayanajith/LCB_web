@@ -6,7 +6,7 @@ const categoryRoutes = require('./Routes/category.routes');
 const userRoutes = require('./Routes/user.routes');
 const authRoutes = require('./Routes/auth.routers');
 const phonebookRoutes = require('./Routes/phoneBook.router');
-const reviewRoutes = require('./Routes/review.routes');
+
 const path = require('path');
 const {sendEmail} = require('./emailServer');
 require('dotenv').config();
@@ -45,7 +45,7 @@ app.use('/api', categoryRoutes);
 app.use('/api', userRoutes);
 app.use('/api', authRoutes);
 app.use('/api', phonebookRoutes);
-app.use('/api', reviewRoutes);
+
 
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

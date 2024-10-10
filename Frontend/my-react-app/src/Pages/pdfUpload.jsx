@@ -43,6 +43,7 @@ const PdfUpload = () => {
     formData.append('category', category);
     formData.append('subCategory', subCategory);
     formData.append('file', file);
+    formData.append('approval',true);
 
     try {
       const response = await axios.post(`http://192.168.10.30:5000/api/pdfupload`, formData, {

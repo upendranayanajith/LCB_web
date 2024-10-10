@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import Header from '../Components/headerAdmin';
+import Header from '../Components/headerManager';
 import Footer from '../Components/footer';
 
-const ReviewUpload = () => {
-  const [reviewName, setReviewName] = useState('');
-  const [reviewDescription, setReviewDescription] = useState('');
+const PdfUpload = () => {
+  const [pdfName, setPdfName] = useState('');
+  const [pdfDescription, setPdfDescription] = useState('');
   const [category, setCategory] = useState('');
   const [subCategory, setSubCategory] = useState('');
   const [file, setFile] = useState(null);
@@ -31,71 +31,59 @@ const ReviewUpload = () => {
     e.preventDefault();
     setSuccessMessage('');
     setErrorMessage('');
-  
-    if (!reviewName || !reviewDescription || !category || !subCategory || !file) {
+
+    if (!pdfName || !pdfDescription || !category || !subCategory || !file) {
       setErrorMessage('All fields are required');
       return;
     }
-  
+
     const formData = new FormData();
-    formData.append('reviewName', reviewName);
-    formData.append('reviewDescription', reviewDescription);
+    formData.append('pdfName', pdfName);
+    formData.append('pdfDescription', pdfDescription);
     formData.append('category', category);
     formData.append('subCategory', subCategory);
     formData.append('file', file);
-  
+    formData.append('approval',true);
+
     try {
-      const response = await axios.post(`http://192.168.10.30:5000/api/reviewupload`, formData, {
+      const response = await axios.post(`http://192.168.10.30:5000/api/pdfupload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
-        },
-        validateStatus: function (status) {
-          return status < 500; // Resolve only if the status code is less than 500
         }
       });
-  
+
       if (response.status === 201 || response.status === 200) {
-        setSuccessMessage('REVIEW uploaded successfully!');
-  
-        if (sendEmail) {
-          // Send email notification
-          const emailSubject = `New ${category} Document Uploaded to Intranet`;
-          const emailBody = `A new document "${reviewName}" has been uploaded to the Intranet. This is for ${reviewDescription} in ${subCategory} of ${category}. Please refer to it: <a href="http://192.168.10.30:443/home">Click Here</a>.`;
-  
-          try {
-            await axios.post(`http://192.168.10.30:5000/api/sendemail`, {
-              subject: emailSubject,
-              body: emailBody
-            });
-            console.log('Email notification sent successfully');
-          } catch (emailError) {
-            console.error('Error sending email notification:', emailError);
-          }
-        }
-  
-        setReviewName('');
-        setReviewDescription('');
+        setSuccessMessage('PDF uploaded successfully!');
+
+if(sendEmail) {
+ // Send email notification
+ const emailSubject = `New ${category} Document Uploaded to Intranet`;
+ const emailBody = `A new document "${pdfName}" has been uploaded to the Intranet. This is for ${pdfDescription} in ${subCategory} of ${category}. Please refer to it: <a href="http://192.168.10.30:443/home">Click Here</a>.`;
+
+ 
+ try {
+   await axios.post(`http://192.168.10.30:5000/api/sendemail`, {
+     subject: emailSubject,
+     body: emailBody
+   });
+   console.log('Email notification sent successfully');
+ } catch (emailError) {
+   console.error('Error sending email notification:', emailError);
+ }
+
+}
+
+        setPdfName('');
+        setPdfDescription('');
         setCategory('');
         setSubCategory('');
         setFile(null);
       } else {
-        console.error('Server responded with status:', response.status, response.data);
-        setErrorMessage(`Failed to upload the REVIEW. Server responded with status ${response.status}: ${JSON.stringify(response.data)}`);
+        setErrorMessage('Failed to upload the PDF. Please try again.');
       }
     } catch (error) {
       console.error('Error uploading file', error);
-      if (error.response) {
-        console.error('Response data:', error.response.data);
-        console.error('Response status:', error.response.status);
-        console.error('Response headers:', error.response.headers);
-        setErrorMessage(`Error uploading file. Server responded with status ${error.response.status}: ${JSON.stringify(error.response.data)}`);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-        setErrorMessage('Error uploading file. No response received from the server.');
-      } else {
-        console.error('Error message:', error.message);
-        setErrorMessage(`Error uploading file: ${error.message}`);
-      }
+      setErrorMessage('Error uploading file. Please try again.');
     }
   };
 
@@ -104,25 +92,25 @@ const ReviewUpload = () => {
       <Header />
       <main className="flex-grow flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-xl w-full">
-          <h1 className="text-2xl font-bold mb-4 text-blue-900">REVIEW Upload Component</h1>
+          <h1 className="text-2xl font-bold mb-4 text-blue-900">PDF Upload Component</h1>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">REVIEW Name</label>
+              <label className="block text-sm font-medium text-gray-700">PDF Name</label>
               <input
                 type="text"
-                value={reviewName}
-                onChange={(e) => setReviewName(e.target.value)}
-                placeholder="Enter REVIEW name"
+                value={pdfName}
+                onChange={(e) => setPdfName(e.target.value)}
+                placeholder="Enter PDF name"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-100 placeholder-gray-500 text-gray-700"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">REVIEW Description</label>
+              <label className="block text-sm font-medium text-gray-700">PDF Description</label>
               <textarea
-                value={reviewDescription}
-                onChange={(e) => setReviewDescription(e.target.value)}
-                placeholder="Enter REVIEW description"
+                value={pdfDescription}
+                onChange={(e) => setPdfDescription(e.target.value)}
+                placeholder="Enter PDF description"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-100 placeholder-gray-500 text-gray-700"
                 required
               />
@@ -159,10 +147,10 @@ const ReviewUpload = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Upload REVIEW</label>
+              <label className="block text-sm font-medium text-gray-700">Upload PDF</label>
               <input
                 type="file"
-                accept="application/review"
+                accept="application/pdf"
                 onChange={(e) => setFile(e.target.files[0])}
                 className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 bg-gray-100"
                 required
@@ -213,4 +201,4 @@ const ReviewUpload = () => {
   );
 };
 
-export default ReviewUpload;
+export default PdfUpload;

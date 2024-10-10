@@ -31,9 +31,18 @@ pdfStatus: {
   date: {
     type: Date,
     default: function() {
-      return new Date(); // Set the date to now when document is created
+      return new Date(); 
     }
+  },
+
+approval: {
+    type: Boolean,
+    default: false
+    
+    
   }
+
+
 });
 
 const Pdf = mongoose.model('Pdf', pdfSchema);

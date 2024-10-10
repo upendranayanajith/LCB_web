@@ -68,12 +68,12 @@ const PDFManagement = ({ isOpen, onClose }) => {
   const handleToggleStatus = async (id, currentStatus) => {
     try {
       const newStatus = !currentStatus; // Toggle the current status
-  
+
       // Send the PUT request to the backend to update pdfStatus
       await axios.put(`http://192.168.10.30:5000/api/pdfs/${id}`, {
         pdfStatus: newStatus, // Use pdfStatus instead of pdfstatus
       });
-  
+
       setSuccessMessage(`PDF status updated to ${newStatus ? 'Active' : 'Inactive'}`);
       // After successful update, fetch the updated list of PDFs to reflect the change
       fetchPdfs();
@@ -82,9 +82,9 @@ const PDFManagement = ({ isOpen, onClose }) => {
       setErrorMessage('Failed to update status. Please try again.');
     }
   };
-  
 
-  const filteredPdfs = pdfs.filter(pdf => 
+
+  const filteredPdfs = pdfs.filter(pdf =>
     pdf.pdfName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pdf.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pdf.subCategory.toLowerCase().includes(searchTerm.toLowerCase())
@@ -179,8 +179,8 @@ const PDFManagement = ({ isOpen, onClose }) => {
 
 
                 <td className="border p-2">
-  {new Date(pdf.date).toLocaleDateString()} 
-</td>
+                  {new Date(pdf.date).toLocaleDateString()}
+                </td>
 
 
 
@@ -188,21 +188,21 @@ const PDFManagement = ({ isOpen, onClose }) => {
 
 
                 <td className="border p-2">
-  <label className="relative inline-flex items-center cursor-pointer">
-    <input
-      type="checkbox"
-      className="sr-only peer"
-      checked={pdf.pdfStatus} // Reflect the current status from the database
-      onChange={() => handleToggleStatus(pdf._id, pdf.pdfStatus)} // Toggle status on click
-    />
-    <div
-      className={`w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600`}
-    ></div>
-    <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-      {pdf.pdfStatus ? 'Active' : 'Inactive'} {/* Display status based on pdf.pdfstatus */}
-    </span>
-  </label>
-</td>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={pdf.pdfStatus} // Reflect the current status from the database
+                      onChange={() => handleToggleStatus(pdf._id, pdf.pdfStatus)} // Toggle status on click
+                    />
+                    <div
+                      className={`w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600`}
+                    ></div>
+                    <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+                      {pdf.pdfStatus ? 'Active' : 'Inactive'} {/* Display status based on pdf.pdfstatus */}
+                    </span>
+                  </label>
+                </td>
 
 
 

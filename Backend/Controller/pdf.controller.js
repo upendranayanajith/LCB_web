@@ -22,7 +22,7 @@ const uploadPdf = async (req, res) => {
             category,
             subCategory,
             filePath,
-            pdfStatus: true // Assuming new PDFs are active by default
+           approval: true
         });
 
         const savedPdf = await newPdf.save();

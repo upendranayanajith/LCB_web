@@ -36,12 +36,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/applications" element={<Application />} />
           <Route path="/tutorials" element={<Tutorial />} />
           <Route path="/circulars" element={<Circulars />} />
-    
-
-
           <Route path="/phoneBook" element={<PhoneBook />} />
-          <Route path="/managePhoneBook" element={<ManagePhoneBook />} />
-<Route path="/adminReview" element={<AdminReview />} />
+
+
+
+
+
 
           {/* Protected Routes */}
           <Route path="/pdfUpload" element={<ProtectedRoute allowedRoles={['Admin', 'Manager']}><PdfUpload /></ProtectedRoute>} />
@@ -51,7 +51,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/homeManager" element={<ProtectedRoute allowedRoles={['Manager']}><HomeManager /></ProtectedRoute>} />
           <Route path="/userlogs" element={<ProtectedRoute allowedRoles={['Admin']}><Userlogs /></ProtectedRoute>} />
           <Route path="/managePdf" element={<ProtectedRoute allowedRoles={['Admin', 'Manager']}><ManagePdf /></ProtectedRoute>} />
-          
+          <Route path="/managePhoneBook" element={<ProtectedRoute allowedRoles={['Admin', 'Manager']}><ManagePhoneBook /></ProtectedRoute>} />
+          <Route path="/adminReview" element={<ProtectedRoute allowedRoles={['Admin']}><AdminReview /></ProtectedRoute>} />
+
         </Routes>
       </Router>
     </AuthProvider>
