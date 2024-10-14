@@ -74,6 +74,7 @@ const PhonebookEntryForm = () => {
     extensionCode: '',
     mobile: '',
     email: '',
+    id: null,
   });
 
   const [entries, setEntries] = useState([]);
@@ -125,16 +126,17 @@ const PhonebookEntryForm = () => {
         id: entry.id || entry._id
       }));
       setEntries(entriesWithIds);
-
+  
       // Extract unique designations from entries
       const uniqueDesignations = [...new Set(entriesWithIds.map(entry => entry.designation))];
       setDesignations(uniqueDesignations);
     } catch (error) {
-      console.error('Error fetching entries:', error);
+      console.error('Error fetching entries:', error.response ? error.response.data : error.message);
       setErrorMessage('Failed to fetch entries. Please try again.');
     }
   };
 
+  
   const fetchDepartments = async () => {
     try {
       const response = await axios.get('http://192.168.10.30:5000/api/categories');
@@ -208,20 +210,24 @@ const PhonebookEntryForm = () => {
     e.preventDefault();
     setSuccessMessage('');
     setErrorMessage('');
-
+  
     if (!validateForm(formData)) {
       return;
     }
-
+  
     try {
-      if (editingEntry) {
-        await axios.put(`http://192.168.10.30:5000/api/entries/${editingEntry.id}`, formData);
+      const dataToSend = { ...formData };
+      delete dataToSend.id; // Remove id for new entries
+  
+      if (formData.id) {
+        await axios.put(`http://192.168.10.30:5000/api/entries/${formData.id}`, dataToSend);
         setSuccessMessage('Phonebook entry updated successfully!');
-        setEditingEntry(null);
       } else {
-        await axios.post('http://192.168.10.30:5000/api/entries', formData);
+        const response = await axios.post('http://192.168.10.30:5000/api/entries', dataToSend);
         setSuccessMessage('Phonebook entry added successfully!');
+        console.log('Server response:', response.data); // Log the server response
       }
+      
       setFormData({
         name: '',
         designation: '',
@@ -230,28 +236,42 @@ const PhonebookEntryForm = () => {
         extensionCode: '',
         mobile: '',
         email: '',
+        id: null
       });
+      setEditingEntry(null);
       fetchEntries(); // Refresh the entries list
     } catch (error) {
-      console.error('Error saving entry:', error);
-      setErrorMessage('Failed to save entry. Please try again.');
+      console.error('Error saving entry:', error.response ? error.response.data : error.message);
+      setErrorMessage(`Failed to save entry: ${error.response ? error.response.data.message : error.message}`);
     }
   };
 
   const handleEdit = (entry) => {
-    setEditingEntry(entry);
-    setFormData(entry);
+    const entryWithId = {
+      ...entry,
+      id: entry.id || entry._id
+    };
+    setEditingEntry(entryWithId);
+    setFormData({
+      ...entryWithId,
+      id: entryWithId.id // Ensure ID is included in formData
+    });
     setIsPopupOpen(false);
   };
 
   const handleDelete = async (id) => {
+    if (!id) {
+      setErrorMessage('Invalid entry ID for deletion');
+      return;
+    }
+  
     try {
       await axios.delete(`http://192.168.10.30:5000/api/entries/${id}`);
       setEntries(entries.filter(entry => entry.id !== id));
       setSuccessMessage('Entry deleted successfully!');
     } catch (error) {
-      console.error('Error deleting entry:', error);
-      setErrorMessage('Failed to delete entry. Please try again.');
+      console.error('Error deleting entry:', error.response ? error.response.data : error.message);
+      setErrorMessage(`Failed to delete entry: ${error.response ? error.response.data.message : error.message}`);
     }
   };
 
