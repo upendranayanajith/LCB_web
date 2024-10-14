@@ -3,6 +3,8 @@ import axios from 'axios';
 import Header from '../Components/headerAdmin';
 import Footer from '../Components/footer';
 
+
+
 const PdfUpload = () => {
   const [pdfName, setPdfName] = useState('');
   const [pdfDescription, setPdfDescription] = useState('');
@@ -12,7 +14,7 @@ const PdfUpload = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [departments, setDepartments] = useState([]);
-  const [sendEmail, setSendEmail] = useState(true); 
+  const [wordCount, setWordCount] = useState(0); // Word count state
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -27,52 +29,89 @@ const PdfUpload = () => {
     fetchCategories();
   }, []);
 
+  const handleDescriptionChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= 100) {
+      setPdfDescription(value);
+      setWordCount(value.length); // Update word count
+    }
+  };
+
+
+
+  const emailCategories = {
+    ADMIN: 'admin',
+    ALL_USERS: 'all_users',
+    MANAGER_CREDIT: 'Credit',
+    MANAGER_FINANCE: 'Finance',
+    MANAGER_IT_DEPARTMENT: 'IT Department',
+    MANAGER_HUMAN_RESOURCES: 'Human Resources',
+    MANAGER_LEGAL: 'Legal',
+    MANAGER_OPERATIONS: 'Operations',
+  };
+
+
+
+
+  const sendEmail = async (subject, body, recipient) => {
+    try {
+      const response = await axios.post('http://192.168.10.30:5000/api/sendEmail', {
+        subject,
+        body,
+        category: recipient,
+      });
+      if (response.status === 200) {
+        console.log('Email sent successfully');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  };
+
+
+
+
+
+
+  const sendAdminNotification = async (doc) => {
+    const emailSubject = `New ${doc.category} Document Awaiting Approval`;
+    const emailBody = `A new document "${doc.pdfName}" has been uploaded for approval. It is for ${doc.pdfDescription} in ${doc.subCategory} of ${doc.category}. Please review it: <a href="http://192.168.10.30:443/homeAdmin">Click Here</a>.<br><br>Note: Please check before approving.`;
+    await sendEmail(emailSubject, emailBody, emailCategories.ADMIN);
+  };
+
+  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSuccessMessage('');
     setErrorMessage('');
-
+  
     if (!pdfName || !pdfDescription || !category || !subCategory || !file) {
       setErrorMessage('All fields are required');
       return;
     }
-
+  
     const formData = new FormData();
     formData.append('pdfName', pdfName);
     formData.append('pdfDescription', pdfDescription);
     formData.append('category', category);
     formData.append('subCategory', subCategory);
     formData.append('file', file);
-    formData.append('approval',true);
-
+    formData.append('approval', false);
+  
     try {
       const response = await axios.post(`http://192.168.10.30:5000/api/pdfupload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-
+  
       if (response.status === 201 || response.status === 200) {
         setSuccessMessage('PDF uploaded successfully!');
-
-if(sendEmail) {
- // Send email notification
- const emailSubject = `New ${category} Document Uploaded to Intranet`;
- const emailBody = `A new document "${pdfName}" has been uploaded to the Intranet. This is for ${pdfDescription} in ${subCategory} of ${category}. Please refer to it: <a href="http://192.168.10.30:443/home">Click Here</a>.`;
-
- 
- try {
-   await axios.post(`http://192.168.10.30:5000/api/sendemail`, {
-     subject: emailSubject,
-     body: emailBody
-   });
-   console.log('Email notification sent successfully');
- } catch (emailError) {
-   console.error('Error sending email notification:', emailError);
- }
-
-}
-
+        
+        // Send email notification to admin
+        await sendAdminNotification(response.data);
+  
         setPdfName('');
         setPdfDescription('');
         setCategory('');
@@ -106,14 +145,15 @@ if(sendEmail) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">PDF Description</label>
+              <label className="block text-sm font-medium text-gray-700">PDF Description (Max 100 characters)</label>
               <textarea
                 value={pdfDescription}
-                onChange={(e) => setPdfDescription(e.target.value)}
+                onChange={handleDescriptionChange}
                 placeholder="Enter PDF description"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-100 placeholder-gray-500 text-gray-700"
                 required
               />
+              <p className="text-sm text-gray-500 mt-1">{wordCount}/100 characters</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Category</label>
@@ -156,26 +196,8 @@ if(sendEmail) {
                 required
               />
             </div>
-           
-           
-            <div className="flex items-center">
-  <input
-    type="checkbox"
-    id="send-email-checkbox"
-    checked={!sendEmail}
-    onChange={() => setSendEmail(!sendEmail)}
-    className="mr-2"
-  />
-  <label htmlFor="send-email-checkbox" className="text-sm text-gray-700">
-    Don't send an acknowledge mail
-  </label>
-</div>
-
-           
-           
-           
-           
-           <div>
+            
+            <div>
               <button
                 type="submit"
                 className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

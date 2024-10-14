@@ -3,6 +3,7 @@ import axios from 'axios';
 import Header from '../Components/headerManager';
 import Footer from '../Components/footer';
 
+
 const PdfUpload = () => {
   const [pdfName, setPdfName] = useState('');
   const [pdfDescription, setPdfDescription] = useState('');
@@ -12,7 +13,7 @@ const PdfUpload = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [departments, setDepartments] = useState([]);
-  const [sendEmail, setSendEmail] = useState(true); 
+  const [wordCount, setWordCount] = useState(0); // Word count state
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -26,6 +27,18 @@ const PdfUpload = () => {
 
     fetchCategories();
   }, []);
+
+  const handleDescriptionChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= 100) {
+      setPdfDescription(value);
+      setWordCount(value.length); // Update word count
+    }
+  };
+
+
+
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,7 +56,7 @@ const PdfUpload = () => {
     formData.append('category', category);
     formData.append('subCategory', subCategory);
     formData.append('file', file);
-    formData.append('approval',true);
+    formData.append('approval', true);
 
     try {
       const response = await axios.post(`http://192.168.10.30:5000/api/pdfupload`, formData, {
@@ -54,25 +67,22 @@ const PdfUpload = () => {
 
       if (response.status === 201 || response.status === 200) {
         setSuccessMessage('PDF uploaded successfully!');
-
-if(sendEmail) {
- // Send email notification
- const emailSubject = `New ${category} Document Uploaded to Intranet`;
- const emailBody = `A new document "${pdfName}" has been uploaded to the Intranet. This is for ${pdfDescription} in ${subCategory} of ${category}. Please refer to it: <a href="http://192.168.10.30:443/home">Click Here</a>.`;
-
- 
- try {
-   await axios.post(`http://192.168.10.30:5000/api/sendemail`, {
-     subject: emailSubject,
-     body: emailBody
-   });
-   console.log('Email notification sent successfully');
- } catch (emailError) {
-   console.error('Error sending email notification:', emailError);
- }
-
-}
-
+  
+        // Send email notification
+        const emailSubject = `New ${category} Document Awaiting Approval`;
+        const emailBody = `A new document "${pdfName}" has been uploaded for approval. It is for ${pdfDescription} in ${subCategory} of ${category}. Please review it: <a href="http://192.168.10.30:443/homeAdmin">Click Here</a>.<br><br>Note: Please check before approving.`;
+        
+        try {
+          await axios.post(`http://192.168.10.30:5000/api/sendemail`, {
+            subject: emailSubject,
+            body: emailBody,
+            category: 'ADMIN' // This corresponds to emailCategories.ADMIN in the backend
+          });
+          console.log('Email notification sent successfully');
+        } catch (emailError) {
+          console.error('Error sending email notification:', emailError);
+        }
+  
         setPdfName('');
         setPdfDescription('');
         setCategory('');
@@ -87,6 +97,7 @@ if(sendEmail) {
     }
   };
 
+  
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -106,14 +117,15 @@ if(sendEmail) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">PDF Description</label>
+              <label className="block text-sm font-medium text-gray-700">PDF Description (Max 100 characters)</label>
               <textarea
                 value={pdfDescription}
-                onChange={(e) => setPdfDescription(e.target.value)}
+                onChange={handleDescriptionChange}
                 placeholder="Enter PDF description"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-100 placeholder-gray-500 text-gray-700"
                 required
               />
+              <p className="text-sm text-gray-500 mt-1">{wordCount}/100 characters</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Category</label>
@@ -156,26 +168,8 @@ if(sendEmail) {
                 required
               />
             </div>
-           
-           
-            <div className="flex items-center">
-  <input
-    type="checkbox"
-    id="send-email-checkbox"
-    checked={!sendEmail}
-    onChange={() => setSendEmail(!sendEmail)}
-    className="mr-2"
-  />
-  <label htmlFor="send-email-checkbox" className="text-sm text-gray-700">
-    Don't send an acknowledge mail
-  </label>
-</div>
-
-           
-           
-           
-           
-           <div>
+            
+            <div>
               <button
                 type="submit"
                 className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

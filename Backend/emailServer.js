@@ -5,6 +5,36 @@ const nodemailer = require('nodemailer');
 const host = "mail.lcbfinance.net";
 const port = 25;
 
+// Email categories
+const emailCategories = {
+  ADMIN: 'admin',
+  ALL_USERS: 'all_users',
+
+  MANAGER_CREDIT: 'Credit',
+  MANAGER_FINANCE: 'Finance',
+  MANAGER_IT_DEPARTMENT: 'IT Department',
+  MANAGER_HUMAN_RESOURCES: 'Human Resources',
+  MANAGER_LEGAL: 'Legal',
+  MANAGER_OPERATIONS: 'Operations',
+
+};
+
+// Email recipients
+const emailRecipients = {
+ [emailCategories.ADMIN]: ['upendra.n@lcbfinance.net'], // Add admin email(s) here
+[emailCategories.ALL_USERS]: ['ramila.b@lcbfinance.net'], // Keep existing all users email
+
+
+
+  [emailCategories.MANAGER_CREDIT]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
+  [emailCategories.MANAGER_FINANCE]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
+  [emailCategories.MANAGER_IT_DEPARTMENT]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
+  [emailCategories.MANAGER_HUMAN_RESOURCES]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
+  [emailCategories.MANAGER_LEGAL]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
+  [emailCategories.MANAGER_OPERATIONS]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
+
+};
+
 // Function to check connectivity (similar to telnet)
 const checkSMTPConnection = async () => {
   return new Promise((resolve, reject) => {
@@ -12,7 +42,6 @@ const checkSMTPConnection = async () => {
 
     console.log('Attempting to connect to SMTP server...');
 
-    // Set a timeout for the connection
     client.setTimeout(5000); // 5 seconds timeout
 
     client.connect(port, host, () => {
@@ -20,7 +49,6 @@ const checkSMTPConnection = async () => {
       client.write('HELO lcbfinance.net\r\n');
     });
 
-    // Handle data from the server
     client.on('data', (data) => {
       console.log('Received: ' + data.toString());
       if (data.toString().includes('220')) {
@@ -30,23 +58,20 @@ const checkSMTPConnection = async () => {
         console.log('SMTP server not responding correctly');
         reject('Invalid SMTP response');
       }
-      client.write('QUIT\r\n'); // Gracefully close the connection
+      client.write('QUIT\r\n');
     });
 
-    // Handle connection timeout
     client.on('timeout', () => {
       console.error('Connection timed out');
       client.destroy();
       reject(new Error('Connection timed out'));
     });
 
-    // Handle error during connection
     client.on('error', (err) => {
       console.error('Connection error: ' + err.message);
       reject(err);
     });
 
-    // Handle connection closed
     client.on('close', () => {
       console.log('Connection closed');
     });
@@ -55,34 +80,33 @@ const checkSMTPConnection = async () => {
 
 // Create a Nodemailer transporter using SMTP
 let transporter = nodemailer.createTransport({
-    host: host,
-    port: port,
-    secure: false, 
-    auth: {
-      user: 'inet@lcbfinance.net',
-      pass: 'Password'
-    },
-    tls: {
-      rejectUnauthorized: true
-    },
-    debug: true,
-    logger: true
+  host: host,
+  port: port,
+  secure: false, 
+  auth: {
+    user: 'inet@lcbfinance.net',
+    pass: 'Password'
+  },
+  tls: {
+    rejectUnauthorized: true
+  },
+  debug: true,
+  logger: true
 });
-console.log('Using Email User:', process.env.EMAIL_USER);
+
 // Function to send email
-const sendEmail = async (subject, body) => {
+const sendEmail = async (subject, body, category = emailCategories.ADMIN) => {
   try {
     console.log('Attempting to send email...');
 
     // Check SMTP connection first (Telnet-like)
     await checkSMTPConnection();
 
-    console.log('Email User:', process.env.EMAIL_USER);
-    console.log('Email Pass:', process.env.EMAIL_PASS.substring(0, 3) + '...');
+    const recipients = emailRecipients[category] || emailRecipients[emailCategories.ALL_USERS];
 
     let info = await transporter.sendMail({
       from: 'inet@lcbfinance.net',
-      to: 'upendra.n@lcbfinance.net', // Make sure to validate this email
+      to: recipients.join(', '),
       subject: subject,
       text: body,
       html: `<p>${body}</p>`,
@@ -106,4 +130,4 @@ transporter.verify((error, success) => {
   }
 });
 
-module.exports = { sendEmail };
+module.exports = { sendEmail, emailCategories };
