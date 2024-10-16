@@ -65,13 +65,13 @@ const deleteEntry = async (req, res) => {
       return res.status(StatusCodes.NOT_FOUND).json({ message: `No Entry with id: ${id}` });
     }
 
-    entry.status = false;
-    await entry.save();
+    // Instead of setting status to false, let's actually delete the entry
+    await PhonebookEntry.findByIdAndDelete(id);
 
-    res.status(StatusCodes.OK).json({ message: 'Entry deactivated successfully', entry });
+    res.status(StatusCodes.OK).json({ message: 'Entry deleted successfully' });
   } catch (err) {
-    console.error('Error deactivating entry:', err);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error deactivating entry' });
+    console.error('Error deleting entry:', err);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error deleting entry', error: err.message });
   }
 };
 

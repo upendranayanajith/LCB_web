@@ -65,6 +65,10 @@ const ViewEntriesPopup = ({ entries, isOpen, onClose, onEdit, onDelete }) => {
   );
 };
 
+
+
+
+
 const PhonebookEntryForm = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -82,9 +86,8 @@ const PhonebookEntryForm = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [editingEntry, setEditingEntry] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [isCustomDesignation, setIsCustomDesignation] = useState(false);
   const [departments, setDepartments] = useState([]);
-  const [branches, setBranches] = useState([
+  const [branches] = useState([
     'Agunukolapelessa', 'Akuressa', 'Deiyandara', 'Embilipitiya', 'Galle', 'Gampaha', 'Head Office', 'Karandeniya', 'Karapitiya', 'Kegalle', 'Kohuwala',
     'Kuliyapitiya', 'Matara', 'Maharagama', 'Negombo', 'Pelawaththa', 'Rathgama', 'Tangalle', 'Tissamaharama', 'Walasmulla'
   ]);
@@ -96,10 +99,14 @@ const PhonebookEntryForm = () => {
 'Chief Executive Officer (CEO)',  
 'Chief Financial Officer (CFO)',  
 'Chief Operations Officer (COO)',  
-'Chief Marketing Officer (CMO)',  
+'Chief Marketing Officer (CMO)', 
+'Secretary',
+'Deputy General Manager (DGM)', 
 'Department Heads',  
 'Branch Managers',  
-'Regional Managers',  
+'Regional Managers', 
+'Senior Executive',
+'Junior Executive', 
 'Loan Officers',  
 'Customer Service Representatives',  
 'Data Analysts',  
@@ -157,41 +164,22 @@ const PhonebookEntryForm = () => {
 
   const handleDesignationChange = (e) => {
     const value = e.target.value;
-    if (value === 'other') {
-      // If 'Other' is selected, don't clear the designation field
-      setFormData(prevData => ({
-        ...prevData,
-        designation: ''
-      }));
-    } else {
-      setFormData(prevData => ({
-        ...prevData,
-        designation: value
-      }));
-    }
+    setFormData(prevData => ({
+      ...prevData,
+      designation: value === 'other' ? '' : value
+    }));
   };
 
   const handleCustomDesignationChange = (e) => {
-    const value = e.target.value;
     setFormData(prevData => ({
       ...prevData,
-      designation: value
+      designation: e.target.value
     }));
   };
 
-  const handleCustomInput = (e, field, setField) => {
-    const value = e.target.value;
-    if (!field.includes(value)) {
-      setField([...field, value]);
-    }
-    setFormData(prevData => ({
-      ...prevData,
-      [e.target.name]: value
-    }));
-  };
 
   const validateForm = (data) => {
-    if (!data.name || !data.designation || !data.branch || !data.department || !data.mobile || !data.email) {
+    if (!data.name || !data.designation || !data.branch || !data.department || !data.mobile) {
       setErrorMessage('Please fill in all required fields.');
       return false;
     }
@@ -218,7 +206,10 @@ const PhonebookEntryForm = () => {
     try {
       const dataToSend = { ...formData };
       delete dataToSend.id; // Remove id for new entries
-  
+      if (!branches.includes(formData.branch)) {
+        setErrorMessage('Invalid branch selected. Please choose from the provided options.');
+        return;
+      }
       if (formData.id) {
         await axios.put(`http://192.168.10.30:5000/api/entries/${formData.id}`, dataToSend);
         setSuccessMessage('Phonebook entry updated successfully!');
@@ -266,12 +257,18 @@ const PhonebookEntryForm = () => {
     }
   
     try {
-      await axios.delete(`http://192.168.10.30:5000/api/entries/${id}`);
+      // Instead of deleting, we're updating the status to false
+      await axios.put(`http://192.168.10.30:5000/api/entries/${id}`, { status: false });
+      
+      // Update the local state to remove the entry from the list
       setEntries(entries.filter(entry => entry.id !== id));
-      setSuccessMessage('Entry deleted successfully!');
+      setSuccessMessage('Entry successfully marked as deleted.');
+      
+      // Optionally, you might want to refresh the entries list
+      // fetchEntries();
     } catch (error) {
-      console.error('Error deleting entry:', error.response ? error.response.data : error.message);
-      setErrorMessage(`Failed to delete entry: ${error.response ? error.response.data.message : error.message}`);
+      console.error('Error marking entry as deleted:', error.response ? error.response.data : error.message);
+      setErrorMessage(`Failed to mark entry as deleted: ${error.response ? error.response.data.message : error.message}`);
     }
   };
 
@@ -337,24 +334,25 @@ const PhonebookEntryForm = () => {
         />
       )}
     </div>
-                  <div>
+    <div>
                     <label htmlFor="branch" className="block text-sm font-medium text-gray-700">Branch *</label>
-                    <input
-                      type="text"
+                    <select
                       id="branch"
                       name="branch"
                       value={formData.branch}
-                      onChange={(e) => handleCustomInput(e, branches, setBranches)}
+                      onChange={handleChange}
                       required
-                      list="branchOptions"
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                    <datalist id="branchOptions">
+                      className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                      <option value="" disabled>Select a branch</option>
                       {branches.map((branch, index) => (
-                        <option key={index} value={branch} />
+                        <option key={index} value={branch}>
+                          {branch}
+                        </option>
                       ))}
-                    </datalist>
+                    </select>
                   </div>
+
                   <div>
                     <label htmlFor="department" className="block text-sm font-medium text-gray-700">Department *</label>
                     <select

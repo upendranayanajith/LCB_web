@@ -9,30 +9,24 @@ const port = 25;
 const emailCategories = {
   ADMIN: 'admin',
   ALL_USERS: 'all_users',
-
   MANAGER_CREDIT: 'Credit',
   MANAGER_FINANCE: 'Finance',
   MANAGER_IT_DEPARTMENT: 'IT Department',
   MANAGER_HUMAN_RESOURCES: 'Human Resources',
   MANAGER_LEGAL: 'Legal',
   MANAGER_OPERATIONS: 'Operations',
-
 };
 
 // Email recipients
 const emailRecipients = {
- [emailCategories.ADMIN]: ['upendra.n@lcbfinance.net'], // Add admin email(s) here
-[emailCategories.ALL_USERS]: ['ramila.b@lcbfinance.net'], // Keep existing all users email
-
-
-
+  [emailCategories.ADMIN]: ['upendra.n@lcbfinance.net'], // Add admin email(s) here
+  [emailCategories.ALL_USERS]: ['ramila.b@lcbfinance.net'], // Keep existing all users email
   [emailCategories.MANAGER_CREDIT]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
-  [emailCategories.MANAGER_FINANCE]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
+  [emailCategories.MANAGER_FINANCE]: ['ramila.b@lcbfinance.net'], // Add manager email(s) here
   [emailCategories.MANAGER_IT_DEPARTMENT]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
   [emailCategories.MANAGER_HUMAN_RESOURCES]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
-  [emailCategories.MANAGER_LEGAL]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
+  [emailCategories.MANAGER_LEGAL]: ['ramila.b@lcbfinance.net'], // Add manager email(s) here
   [emailCategories.MANAGER_OPERATIONS]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
-
 };
 
 // Function to check connectivity (similar to telnet)

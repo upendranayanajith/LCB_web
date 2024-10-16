@@ -20,7 +20,7 @@ const Header = () => {
                 <Link to="/homeAdmin" className="text-white hover:text-purple-600">Home</Link>
                 <Link to="/pdfupload" className="text-white hover:text-purple-600">Upload Documents</Link>
                 <Link to="/registration" className="text-white hover:text-purple-600">Add Users</Link>
-                <Link to= "/adminReview" className="text-white hover:text-purple-600">Review</Link>
+                <Link to= "/adminReview" className="text-white hover:text-purple-600">Admin Approval</Link>
                 <Link to="/managephoneBook" className="text-white hover:text-purple-600">Phone Book</Link>
                 <button 
                     onClick={handleLoginClick}

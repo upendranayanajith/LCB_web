@@ -17,13 +17,14 @@ branch: {
     type: String,
     required: true,
    default: 'Head Office',
-   enum: ['Head Office', 'Galle','Matara','Kandy','Kurunegala','Jaffna','Kalmunai','Kegalle','Kuliyapitiya','Negombo','Panadura','Ratnapura'],
+   enum: ['Agunukolapelessa', 'Akuressa', 'Deiyandara', 'Embilipitiya', 'Galle', 'Gampaha', 'Head Office', 'Karandeniya', 'Karapitiya', 'Kegalle', 'Kohuwala',
+    'Kuliyapitiya', 'Matara', 'Maharagama', 'Negombo', 'Pelawaththa', 'Rathgama', 'Tangalle', 'Tissamaharama', 'Walasmulla'],
   },
 
   
   department: {
     type: String,
-    required: true,
+    required: false,
   },
   extensionCode: {
     type: String,
@@ -35,7 +36,7 @@ branch: {
   },
   email: {
     type: String,
-    required: true,
+    required: false,
   },
   status: {
     type: Boolean,

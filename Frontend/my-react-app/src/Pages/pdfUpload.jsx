@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Header from '../Components/headerAdmin';
 import Footer from '../Components/footer';
-
 
 
 const PdfUpload = () => {
@@ -15,6 +14,7 @@ const PdfUpload = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [departments, setDepartments] = useState([]);
   const [wordCount, setWordCount] = useState(0); // Word count state
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -58,18 +58,16 @@ const PdfUpload = () => {
       const response = await axios.post('http://192.168.10.30:5000/api/sendEmail', {
         subject,
         body,
-        category: recipient,
+        recipient,
       });
       if (response.status === 200) {
-        console.log('Email sent successfully');
+        console.log(`Email sent successfully to ${recipient}`);
       }
     } catch (error) {
       console.error('Error sending email:', error);
+      throw error;
     }
   };
-
-
-
 
 
 
@@ -79,7 +77,7 @@ const PdfUpload = () => {
     await sendEmail(emailSubject, emailBody, emailCategories.ADMIN);
   };
 
-  
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -125,6 +123,20 @@ const PdfUpload = () => {
       setErrorMessage('Error uploading file. Please try again.');
     }
   };
+
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleCancelFile = () => {
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -186,16 +198,27 @@ const PdfUpload = () => {
                 ))}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Upload PDF</label>
-              <input
-                type="file"
-                accept="application/pdf"
-                onChange={(e) => setFile(e.target.files[0])}
-                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 bg-gray-100"
-                required
-              />
-            </div>
+            <div className="mt-1 flex items-center">
+  <input
+    type="file"
+    accept="application/pdf"
+    onChange={handleFileChange}
+    className="flex-grow block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 bg-gray-100"
+    required
+    ref={fileInputRef}
+  />
+  <button
+    type="button"
+    onClick={handleCancelFile}
+    className={`ml-2 inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded-full shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+      file ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500' : 'bg-gray-400 cursor-not-allowed'
+    }`}
+    disabled={!file}  // Button disabled if no file is selected
+  >
+    ✕
+  </button>
+</div>
+
             
             <div>
               <button
@@ -223,4 +246,5 @@ const PdfUpload = () => {
   );
 };
 
+//export {emailCategories, sendEmail};
 export default PdfUpload;
