@@ -35,20 +35,20 @@ const AdminDocumentReview = () => {
     }
   };
 
-const sendEmail = async (subject, body, recipient) => {
-  try {
-    const response = await axios.post('http://192.168.10.30:5000/api/sendEmail', {
-      subject,
-      body,
-      category:recipient,
-    });
-    if (response.status === 200) {
-      console.log(`Email sent successfully to ${recipient}`);
-    }
-  } catch (error) {
-    console.error('Error sending email:', error);
-  }
-};
+// const sendEmail = async (subject, body, recipient) => {
+//   try {
+//     const response = await axios.post('http://192.168.10.30:5000/api/sendEmail', {
+//       subject,
+//       body,
+//       category:recipient,
+//     });
+//     if (response.status === 200) {
+//       console.log(`Email sent successfully to ${recipient}`);
+//     }
+//   } catch (error) {
+//     console.error('Error sending email:', error);
+//   }
+// };
 
 
 const handleAction = async (id, action) => {
@@ -60,10 +60,10 @@ const handleAction = async (id, action) => {
         setMessage({ type: 'success', content: 'Document approved successfully' });
         doc = response.data;
 
-        // Send email to all users upon approval
-        const emailSubject = `New ${doc.category} Document Approved`;
-        const emailBody = `A new document "${doc.pdfName}" has been approved. It is for ${doc.pdfDescription} in ${doc.subCategory} of ${doc.category}. You can view it here: <a href="http://192.168.10.30:443/home">Click Here</a>.`;
-        await sendEmail(emailSubject, emailBody, emailCategories.ALL_USERS);
+        // // Send email to all users upon approval
+        // const emailSubject = `New ${doc.category} Document Approved`;
+        // const emailBody = `A new document "${doc.pdfName}" has been approved. It is for ${doc.pdfDescription} in ${doc.subCategory} of ${doc.category}. You can view it here: <a href="http://192.168.10.30:443/home">Click Here</a>.`;
+        // await sendEmail(emailSubject, emailBody, emailCategories.ALL_USERS);
       }
     } else if (action === 'reject') {
       const getResponse = await axios.get(`http://192.168.10.30:5000/api/pdfs/${id}`);
@@ -74,18 +74,18 @@ const handleAction = async (id, action) => {
         setMessage({ type: 'success', content: 'Document rejected and deleted successfully' });
 
         // Send email to manager about rejection
-        const emailSubject = `${doc.category} Document Rejected`;
-        const emailBody = `A document "${doc.pdfName}" has been rejected. It was for ${doc.pdfDescription} in ${doc.subCategory} of ${doc.category}.`;
+        // const emailSubject = `${doc.category} Document Rejected`;
+        // const emailBody = `A document "${doc.pdfName}" has been rejected. It was for ${doc.pdfDescription} in ${doc.subCategory} of ${doc.category}.`;
 
         // Determine the correct manager category based on the document's subCategory
-        const managerCategory = `MANAGER_${doc.subCategory.toUpperCase().replace(/\s+/g, '_')}`;
-        if (emailCategories.hasOwnProperty(managerCategory)) {
-          const recipient = emailCategories[managerCategory];
-          console.log(`Sending email to ${managerCategory}: ${recipient}`);
-          await sendEmail(emailSubject, emailBody, recipient);
-        } else {
-          console.error(`No email category found for ${managerCategory}`);
-        }
+        // const managerCategory = `MANAGER_${doc.subCategory.toUpperCase().replace(/\s+/g, '_')}`;
+        // if (emailCategories.hasOwnProperty(managerCategory)) {
+        //   const recipient = emailCategories[managerCategory];
+        //   console.log(`Sending email to ${managerCategory}: ${recipient}`);
+        //   await sendEmail(emailSubject, emailBody, recipient);
+        // } else {
+        //   console.error(`No email category found for ${managerCategory}`);
+        // }
       }
     }
 
@@ -97,11 +97,6 @@ const handleAction = async (id, action) => {
   }
 };
 
-const sendAdminNotification = async (doc) => {
-  const emailSubject = `New ${doc.category} Document Awaiting Approval`;
-  const emailBody = `A new document "${doc.pdfName}" has been uploaded for approval. It is for ${doc.pdfDescription} in ${doc.subCategory} of ${doc.category}. Please review it: <a href="http://192.168.10.30:443/homeAdmin">Click Here</a>.<br><br>Note: Please check before approving.`;
-  await sendEmail(emailSubject, emailBody, emailCategories.ADMIN);
-};
 
 
 

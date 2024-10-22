@@ -12,7 +12,7 @@ const RegistrationPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categories, setCategories] = useState([]);
   const [userRoles] = useState(['Admin', 'Manager']);
-
+  const [usernameError, setUsernameError] = useState('');
   const [categoryName, setCategoryName] = useState('');
   const [categoryDescription, setCategoryDescription] = useState('');
 
@@ -26,10 +26,23 @@ const RegistrationPage = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  const isValidUsername = (username) => {
+    const emailRegex = /^[^\s@]+@lcbfinance\.(net|lk)$/;
+    return emailRegex.test(username);
+  };
+
+
   const handleEmployeeSubmit = async (e) => {
     e.preventDefault();
     setSuccessMessage('');
     setErrorMessage('');
+    setUsernameError('');
+
+    if (!isValidUsername(empUserName)) {
+      setUsernameError('Username must be in the format user@lcbfinance.net or user@lcbfinance.lk');
+      return;
+    }
+
 
     try {
       const response = await axios.post(`http://192.168.10.30:5000/api/users`, {
@@ -55,6 +68,8 @@ const RegistrationPage = () => {
     }
   };
 
+  
+
 
   const resetEmployeeForm = () => {
     setEmpName('');
@@ -62,7 +77,10 @@ const RegistrationPage = () => {
     setEmpUserName('');
     setEmpPassword('');
     setSelectedCategory('');
+   
   };
+
+
 
 
   const handleCategorySubmit = async (e) => {
@@ -211,10 +229,10 @@ const RegistrationPage = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Username</label>
                     <input
-                      type="text"
+                      type="email"
                       value={empUserName}
                       onChange={(e) => setEmpUserName(e.target.value)}
-                      placeholder="Enter username"
+                      placeholder="Enter username (e.g., user@lcbfinance.net / .lk)"
                       className="mt-1 block w-full px-3 py-2 border border-blue-300 rounded-md shadow-sm focus:ring-blue-300 focus:border-blue-500 bg-blue-100 text-blue-800 placeholder-blue-400"
                      required
                     />

@@ -19,7 +19,7 @@ const emailCategories = {
 
 // Email recipients
 const emailRecipients = {
-  [emailCategories.ADMIN]: ['upendra.n@lcbfinance.net'], // Add admin email(s) here
+  [emailCategories.ADMIN]: ['ramila.b@lcbfinance.net'], // Add admin email(s) here
   [emailCategories.ALL_USERS]: ['ramila.b@lcbfinance.net'], // Keep existing all users email
   [emailCategories.MANAGER_CREDIT]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
   [emailCategories.MANAGER_FINANCE]: ['ramila.b@lcbfinance.net'], // Add manager email(s) here
