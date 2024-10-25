@@ -19,7 +19,7 @@ const PdfUpload = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(`http://192.168.10.30:5000/api/categories`);
+        const response = await axios.get(`http://192.168.10.227:5000/api/categories`);
         setDepartments(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -41,21 +41,13 @@ const PdfUpload = () => {
 
   const emailCategories = {
     ADMIN: 'admin',
-    ALL_USERS: 'all_users',
-    MANAGER_CREDIT: 'Credit',
-    MANAGER_FINANCE: 'Finance',
-    MANAGER_IT_DEPARTMENT: 'IT Department',
-    MANAGER_HUMAN_RESOURCES: 'Human Resources',
-    MANAGER_LEGAL: 'Legal',
-    MANAGER_OPERATIONS: 'Operations',
+   
   };
-
-
 
 
   const sendEmail = async (subject, body, recipient) => {
     try {
-      const response = await axios.post('http://192.168.10.30:5000/api/sendEmail', {
+      const response = await axios.post('http://192.168.10.227:5000/api/sendEmail', {
         subject,
         body,
         recipient,
@@ -73,7 +65,7 @@ const PdfUpload = () => {
 
   const sendAdminNotification = async (doc) => {
     const emailSubject = `New ${doc.category} Document Awaiting Approval`;
-    const emailBody = `A new document "${doc.pdfName}" has been uploaded for approval. It is for ${doc.pdfDescription} in ${doc.subCategory} of ${doc.category}. Please review it: <a href="http://192.168.10.30:443/homeAdmin">Click Here</a>.<br><br>Note: Please check before approving.`;
+    const emailBody = `A new document "${doc.pdfName}" has been uploaded for approval. It is for ${doc.pdfDescription} in ${doc.subCategory} of ${doc.category}. Please review it: <a href="http://192.168.10.227:443/homeAdmin">Click Here</a>.<br><br>Note: Please check before approving.`;
     await sendEmail(emailSubject, emailBody, emailCategories.ADMIN);
   };
 
@@ -98,7 +90,7 @@ const PdfUpload = () => {
     formData.append('approval', false);
   
     try {
-      const response = await axios.post(`http://192.168.10.30:5000/api/pdfupload`, formData, {
+      const response = await axios.post(`http://192.168.10.227:5000/api/pdfupload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -142,8 +134,8 @@ const PdfUpload = () => {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-xl w-full">
-          <h1 className="text-2xl font-bold mb-4 text-blue-900">PDF Upload Component</h1>
+        <div className="bg-white p-8 rounded-lg mt-24 shadow-lg max-w-xl w-full">
+          <h1 className="text-2xl font-bold mb-4 text-blue-900">Upload Document</h1>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">PDF Name</label>

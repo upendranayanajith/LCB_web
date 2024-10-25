@@ -12,7 +12,7 @@ const PdfView = () => {
   useEffect(() => {
     const fetchPdfDetails = async () => {
       try {
-        const response = await axios.get(`http://192.168.10.30:5000/api/pdfs/`, {
+        const response = await axios.get(`http://192.168.10.227:5000/api/pdfs/`, {
           params: { path: decodedPath }
         });
         console.log('API Response:', response.data);
@@ -40,7 +40,7 @@ const PdfView = () => {
         <p>Loading...</p>
       ) : (
         <PdfComp 
-          pdfFile={`http://192.168.10.30:5000/${decodedPath}`} 
+          pdfFile={`http://192.168.10.227:5000/${decodedPath}`} 
           pdfName={pdfName}
         />
       )}

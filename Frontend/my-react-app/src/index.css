@@ -6,16 +6,44 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  
-
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reset base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, 
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+body {
+  /* Fixed: Changed display:100vh to proper height and display properties */
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+#root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
 }
 
 a {
@@ -23,16 +51,9 @@ a {
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display:100vh;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
 h1 {
@@ -51,9 +72,11 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
@@ -74,8 +97,29 @@ button:focus-visible {
 
 @font-face {
   font-family: 'Museo Moderno';
-  src:url('fonts/MuseoModerno-VariableFont_wght.ttf') format('truetype'); /* Use 'truetype' instead of 'ttf' */
-  font-weight:500; /* You might want to specify actual weights if applicable */
-  font-style: normal; /* Change this to 'italic' for the italic font */
+  src: url('fonts/MuseoModerno-VariableFont_wght.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
 }
 
+/* Add these utility classes for full-page layouts */
+.full-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.full-height {
+  flex: 1;
+}
+
+/* Fix for background images */
+.bg-fixed {
+  min-height: 100vh;
+  min-width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}

@@ -28,7 +28,7 @@ const RegistrationPage = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(`http://192.168.10.30:5000/api/categories`);
+      const response = await axios.get(`http://192.168.10.227:5000/api/categories`);
       setCategories(response.data);
     } catch (error) {
       console.error('Error fetching categories', error);
@@ -41,7 +41,7 @@ const RegistrationPage = () => {
     setErrorMessage('');
 
     try {
-      const response = await axios.post(`http://192.168.10.30:5000/api/users`, {
+      const response = await axios.post(`http://192.168.10.227:5000/api/users`, {
         name: empName,
         department: selectedCategory,
         role: empRole,
@@ -76,7 +76,7 @@ const RegistrationPage = () => {
     }
 
     try {
-      const response = await axios.post(`http://192.168.10.30:5000/api/categories`, {
+      const response = await axios.post(`http://192.168.10.227:5000/api/categories`, {
         name: categoryName,
         description: categoryDescription,
       });
@@ -96,7 +96,7 @@ const RegistrationPage = () => {
 
   const fetchUserLogs = async () => {
     try {
-      const response = await axios.get(`http://192.168.10.30:5000/api/users`);
+      const response = await axios.get(`http://192.168.10.227:5000/api/users`);
       if (response.status === 200) {
         setUserLogs(response.data);
       }
@@ -107,7 +107,7 @@ const RegistrationPage = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`http://192.168.10.30:5000/api/users`);
+      const response = await axios.get(`http://192.168.10.227:5000/api/users`);
       if (response.status === 200) {
         setUsers(response.data);
         setIsUserDialogOpen(true);
@@ -124,7 +124,7 @@ const RegistrationPage = () => {
 
   const handleUpdateUser = async () => {
     try {
-      const response = await axios.put(`http://192.168.10.30:5000/api/users/${editingUser._id}`, editingUser);
+      const response = await axios.put(`http://192.168.10.227:5000/api/users/${editingUser._id}`, editingUser);
       if (response.status === 200) {
         setSuccessMessage('User updated successfully!');
         setEditingUser(null);
@@ -137,7 +137,7 @@ const RegistrationPage = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
-      const response = await axios.delete(`http://192.168.10.30:5000/api/users/${userId}`);
+      const response = await axios.delete(`http://192.168.10.227:5000/api/users/${userId}`);
       if (response.status === 200) {
         setSuccessMessage('User deleted successfully!');
         fetchUsers();

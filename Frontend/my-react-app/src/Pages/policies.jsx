@@ -18,7 +18,7 @@ const Policies = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(`http://192.168.10.30:5000/api/categories`);
+        const response = await axios.get(`http://192.168.10.227:5000/api/categories`);
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -27,7 +27,7 @@ const Policies = () => {
 
     const fetchPdfs = async () => {
       try {
-        const response = await axios.get(`http://192.168.10.30:5000/api/pdfs`);
+        const response = await axios.get(`http://192.168.10.227:5000/api/pdfs`);
         const filteredPdfs = response.data.filter(pdf => pdf.category === 'Policies' && pdf.pdfStatus === true);
         setPdfs(filteredPdfs);
       } catch (error) {

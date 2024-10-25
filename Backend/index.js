@@ -9,13 +9,14 @@ const phonebookRoutes = require('./Routes/phoneBook.router');
 
 const path = require('path');
 const {sendEmail} = require('./emailServer');
+const {sendEmailMgt} = require('./emailServerMgt');
 require('dotenv').config();
 
 
 const app = express(); // You missed this line in your provided code
 
 app.use(cors({
-  origin: 'http://192.168.10.30:443',
+  origin: 'http://192.168.10.227:443',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
 }));
@@ -70,8 +71,35 @@ app.post('/api/sendemail', async (req, res) => {
 });
 
 
+app.post('/api/sendemailMgt', async (req, res) => {
+  const { action, documentInfo } = req.body;
+  try {
+    if (!action || !documentInfo) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Missing required parameters' 
+      });
+    }
+
+    const info = await sendEmailMgt(action, documentInfo);
+    res.status(200).json({ 
+      success: true, 
+      messageId: info.messageId,
+      message: `Email sent successfully for ${action} action`
+    });
+  } catch (error) {
+    console.error('Error sending email:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to send email',
+      error: error.message 
+    });
+  }
+});
+
+
 const PORT = process.env.PORT || 5000;
-const HOST = '192.168.10.30';
+const HOST = '192.168.10.227';
 
 
 app.listen(PORT, HOST, () => {

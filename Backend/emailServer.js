@@ -5,28 +5,13 @@ const nodemailer = require('nodemailer');
 const host = "mail.lcbfinance.net";
 const port = 25;
 
-// Email categories
+// Email categories and recipients
 const emailCategories = {
   ADMIN: 'admin',
-  ALL_USERS: 'all_users',
-  MANAGER_CREDIT: 'Credit',
-  MANAGER_FINANCE: 'Finance',
-  MANAGER_IT_DEPARTMENT: 'IT Department',
-  MANAGER_HUMAN_RESOURCES: 'Human Resources',
-  MANAGER_LEGAL: 'Legal',
-  MANAGER_OPERATIONS: 'Operations',
 };
 
-// Email recipients
 const emailRecipients = {
   [emailCategories.ADMIN]: ['ramila.b@lcbfinance.net'], // Add admin email(s) here
-  [emailCategories.ALL_USERS]: ['ramila.b@lcbfinance.net'], // Keep existing all users email
-  [emailCategories.MANAGER_CREDIT]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
-  [emailCategories.MANAGER_FINANCE]: ['ramila.b@lcbfinance.net'], // Add manager email(s) here
-  [emailCategories.MANAGER_IT_DEPARTMENT]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
-  [emailCategories.MANAGER_HUMAN_RESOURCES]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
-  [emailCategories.MANAGER_LEGAL]: ['ramila.b@lcbfinance.net'], // Add manager email(s) here
-  [emailCategories.MANAGER_OPERATIONS]: ['upendra.n@lcbfinance.net'], // Add manager email(s) here
 };
 
 // Function to check connectivity (similar to telnet)
@@ -47,12 +32,12 @@ const checkSMTPConnection = async () => {
       console.log('Received: ' + data.toString());
       if (data.toString().includes('220')) {
         console.log('SMTP server is ready');
+        client.write('QUIT\r\n'); // Send QUIT command
         resolve();
       } else {
         console.log('SMTP server not responding correctly');
-        reject('Invalid SMTP response');
+        reject(new Error('Invalid SMTP response'));
       }
-      client.write('QUIT\r\n');
     });
 
     client.on('timeout', () => {
@@ -96,9 +81,13 @@ const sendEmail = async (subject, body, category = emailCategories.ADMIN) => {
     // Check SMTP connection first (Telnet-like)
     await checkSMTPConnection();
 
-    const recipients = emailRecipients[category] || emailRecipients[emailCategories.ALL_USERS];
+    // Get recipients based on category
+    const recipients = emailRecipients[category];
+    if (!recipients || recipients.length === 0) {
+      throw new Error('No recipients found for the specified category');
+    }
 
-    let info = await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: 'inet@lcbfinance.net',
       to: recipients.join(', '),
       subject: subject,

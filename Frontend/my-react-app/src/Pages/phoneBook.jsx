@@ -5,19 +5,73 @@ import Footer from '../Components/footer';
 
 const ResponsivePhonebookTable = () => {
   const [entries, setEntries] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
   const [filterDepartment, setFilterDepartment] = useState('');
   const [filterBranch, setFilterBranch] = useState('');
   const [filterDesignation, setFilterDesignation] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [designations, setDesignations] = useState([]);
+
+  // Predefined branches list
+  const branches = [
+    'Agunukolapelessa', 'Akuressa', 'Deiyandara', 'Embilipitiya', 'Galle', 
+    'Gampaha', 'Head Office', 'Karandeniya', 'Karapitiya', 'Kegalle', 
+    'Kohuwala', 'Kuliyapitiya', 'Matara', 'Maharagama', 'Negombo', 
+    'Pelawaththa', 'Rathgama', 'Tangalle', 'Tissamaharama', 'Walasmulla'
+  ];
+
+  // Predefined designations list
+  const presetDesignations = [
+    'Board of Directors',  
+    'Chief Executive Officer (CEO)',  
+    'Chief Financial Officer (CFO)',  
+    'Chief Operations Officer (COO)',  
+    'Chief Marketing Officer (CMO)', 
+    'Secretary',
+    'Deputy General Manager (DGM)', 
+    'Department Heads',  
+    'Branch Managers',  
+    'Regional Managers', 
+    'Senior Executive',
+    'Junior Executive', 
+    'Loan Officers',  
+    'Customer Service Representatives',  
+    'Data Analysts',  
+    'Accountants',  
+    'Field Officers',  
+    'Community Mobilizers',  
+    'Administrative Assistants',  
+    'Interns/Trainees'
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const response = await axios.get('http://192.168.10.30:5000/api/entries');
-        setEntries(response.data);
+        // Fetch both entries and categories in parallel
+        const [entriesResponse, categoriesResponse] = await Promise.all([
+          axios.get('http://192.168.10.227:5000/api/entries'),
+          axios.get('http://192.168.10.227:5000/api/categories')
+        ]);
+        
+        const activeEntries = entriesResponse.data.filter(entry => entry.status === true);
+        setEntries(activeEntries);
+        setDepartments(categoriesResponse.data);
+        
+        // Extract unique designations from entries and combine with preset designations
+        const entryDesignations = [...new Set(activeEntries.map(entry => entry.designation))];
+        const allDesignations = [...new Set([...presetDesignations, ...entryDesignations])];
+        setDesignations(allDesignations);
+        
+        setError(null);
       } catch (error) {
-        console.error('Error fetching the data', error);
+        console.error('Error fetching data:', error);
+        setError('Failed to load data. Please try again later.');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -56,6 +110,34 @@ const ResponsivePhonebookTable = () => {
     setSortConfig({ key, direction });
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading phonebook data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center p-8 bg-white rounded-lg shadow-lg">
+          <div className="text-red-600 text-xl mb-4">⚠️</div>
+          <p className="text-gray-800 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
       <Header />
@@ -78,41 +160,46 @@ const ResponsivePhonebookTable = () => {
             </div>
 
             <div className="flex flex-wrap gap-4">
+              {/* Department Filter */}
               <select
                 value={filterDepartment}
                 onChange={(e) => setFilterDepartment(e.target.value)}
                 className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="">All Departments</option>
-                <option value="Sales">Sales</option>
-                <option value="IT">IT</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Finance">Finance</option>
-                <option value="Human Resources">Human Resources</option>
+                {departments.map((dept) => (
+                  <option key={dept._id} value={dept.categoryName}>
+                    {dept.categoryName}
+                  </option>
+                ))}
               </select>
 
+              {/* Branch Filter */}
               <select
                 value={filterBranch}
                 onChange={(e) => setFilterBranch(e.target.value)}
                 className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="">All Branches</option>
-                <option value="Head Office">Head Office</option>
-                <option value="Branch 1">Branch 1</option>
-                <option value="Branch 2">Branch 2</option>
+                {branches.map((branch, index) => (
+                  <option key={index} value={branch}>
+                    {branch}
+                  </option>
+                ))}
               </select>
 
+              {/* Designation Filter */}
               <select
                 value={filterDesignation}
                 onChange={(e) => setFilterDesignation(e.target.value)}
                 className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="">All Designations</option>
-                <option value="Manager">Manager</option>
-                <option value="Developer">Developer</option>
-                <option value="Designer">Designer</option>
-                <option value="Accountant">Accountant</option>
-                <option value="HR Specialist">HR Specialist</option>
+                {designations.map((designation, index) => (
+                  <option key={index} value={designation}>
+                    {designation}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -138,7 +225,7 @@ const ResponsivePhonebookTable = () => {
                 </thead>
                 <tbody>
                   {sortedEntries.map((entry, index) => (
-                    <tr key={entry.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
+                    <tr key={entry.id || entry._id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
                       <td className="p-3">{entry.name}</td>
                       <td className="p-3">{entry.designation}</td>
                       <td className="p-3">{entry.department}</td>

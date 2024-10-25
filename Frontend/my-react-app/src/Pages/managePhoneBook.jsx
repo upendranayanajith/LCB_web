@@ -126,7 +126,7 @@ const PhonebookEntryForm = () => {
 
   const fetchEntries = async () => {
     try {
-      const response = await axios.get('http://192.168.10.30:5000/api/entries');
+      const response = await axios.get('http://192.168.10.227:5000/api/entries');
       const filteredEntries = response.data.filter(entry => entry.status === true);
       const entriesWithIds = filteredEntries.map(entry => ({
         ...entry,
@@ -146,7 +146,7 @@ const PhonebookEntryForm = () => {
   
   const fetchDepartments = async () => {
     try {
-      const response = await axios.get('http://192.168.10.30:5000/api/categories');
+      const response = await axios.get('http://192.168.10.227:5000/api/categories');
       setDepartments(response.data);
     } catch (error) {
       console.error('Error fetching departments:', error);
@@ -211,10 +211,10 @@ const PhonebookEntryForm = () => {
         return;
       }
       if (formData.id) {
-        await axios.put(`http://192.168.10.30:5000/api/entries/${formData.id}`, dataToSend);
+        await axios.put(`http://192.168.10.227:5000/api/entries/${formData.id}`, dataToSend);
         setSuccessMessage('Phonebook entry updated successfully!');
       } else {
-        const response = await axios.post('http://192.168.10.30:5000/api/entries', dataToSend);
+        const response = await axios.post('http://192.168.10.227:5000/api/entries', dataToSend);
         setSuccessMessage('Phonebook entry added successfully!');
         console.log('Server response:', response.data); // Log the server response
       }
@@ -258,7 +258,7 @@ const PhonebookEntryForm = () => {
   
     try {
       // Instead of deleting, we're updating the status to false
-      await axios.put(`http://192.168.10.30:5000/api/entries/${id}`, { status: false });
+      await axios.put(`http://192.168.10.227:5000/api/entries/${id}`, { status: false });
       
       // Update the local state to remove the entry from the list
       setEntries(entries.filter(entry => entry.id !== id));

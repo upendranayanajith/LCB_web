@@ -28,7 +28,7 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await axios.post(`http://192.168.10.30:5000/api/login`, { username, password, role });
+      const response = await axios.post(`http://192.168.10.227:5000/api/login`, { username, password, role });
       
       if (response.data && response.data.token) {
         login(response.data.token, role);

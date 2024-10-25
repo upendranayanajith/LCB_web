@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 
+const API_BASE_URL = 'http://192.168.10.227:5000/api/'; // Define at the top for consistency
+
+
 const emailCategories = {
-  ADMIN: 'admin',
   ALL_USERS: 'all_users',
   MANAGER_CREDIT: 'Credit',
   MANAGER_FINANCE: 'Finance',
@@ -19,6 +21,8 @@ const emailCategories = {
 const AdminDocumentReview = () => {
   const [documents, setDocuments] = useState([]);
   const [message, setMessage] = useState({ type: '', content: '' });
+  const [isLoading, setIsLoading] = useState(false);
+
 
   useEffect(() => {
     fetchDocuments();
@@ -26,8 +30,8 @@ const AdminDocumentReview = () => {
 
   const fetchDocuments = async () => {
     try {
-      const response = await axios.get('http://192.168.10.30:5000/api/pdfs');
-      const unapprovedDocs = response.data.filter(doc => doc.approval === false);
+      const response = await axios.get(`${API_BASE_URL}/pdfs`);
+      const unapprovedDocs = response.data.filter(doc => !doc.approval);
       setDocuments(unapprovedDocs);
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -35,73 +39,85 @@ const AdminDocumentReview = () => {
     }
   };
 
-// const sendEmail = async (subject, body, recipient) => {
-//   try {
-//     const response = await axios.post('http://192.168.10.30:5000/api/sendEmail', {
-//       subject,
-//       body,
-//       category:recipient,
-//     });
-//     if (response.status === 200) {
-//       console.log(`Email sent successfully to ${recipient}`);
-//     }
-//   } catch (error) {
-//     console.error('Error sending email:', error);
-//   }
-// };
 
-
-const handleAction = async (id, action) => {
+// WITH THIS NEW CODE
+const sendEmailNotification = async (action, documentInfo) => {
   try {
-    let doc;
-    if (action === 'approve') {
-      const response = await axios.put(`http://192.168.10.30:5000/api/pdfs/${id}`, { approval: true });
-      if (response.status === 200) {
-        setMessage({ type: 'success', content: 'Document approved successfully' });
-        doc = response.data;
+    const response = await axios.post('http://192.168.10.227:5000/api/sendemailMgt', {
+      action,
+      documentInfo
+    });
 
-        // // Send email to all users upon approval
-        // const emailSubject = `New ${doc.category} Document Approved`;
-        // const emailBody = `A new document "${doc.pdfName}" has been approved. It is for ${doc.pdfDescription} in ${doc.subCategory} of ${doc.category}. You can view it here: <a href="http://192.168.10.30:443/home">Click Here</a>.`;
-        // await sendEmail(emailSubject, emailBody, emailCategories.ALL_USERS);
-      }
-    } else if (action === 'reject') {
-      const getResponse = await axios.get(`http://192.168.10.30:5000/api/pdfs/${id}`);
-      doc = getResponse.data;
-
-      const deleteResponse = await axios.delete(`http://192.168.10.30:5000/api/pdfs/${id}`);
-      if (deleteResponse.status === 200) {
-        setMessage({ type: 'success', content: 'Document rejected and deleted successfully' });
-
-        // Send email to manager about rejection
-        // const emailSubject = `${doc.category} Document Rejected`;
-        // const emailBody = `A document "${doc.pdfName}" has been rejected. It was for ${doc.pdfDescription} in ${doc.subCategory} of ${doc.category}.`;
-
-        // Determine the correct manager category based on the document's subCategory
-        // const managerCategory = `MANAGER_${doc.subCategory.toUpperCase().replace(/\s+/g, '_')}`;
-        // if (emailCategories.hasOwnProperty(managerCategory)) {
-        //   const recipient = emailCategories[managerCategory];
-        //   console.log(`Sending email to ${managerCategory}: ${recipient}`);
-        //   await sendEmail(emailSubject, emailBody, recipient);
-        // } else {
-        //   console.error(`No email category found for ${managerCategory}`);
-        // }
-      }
+    if (response.data.success) {
+      console.log(`Email sent successfully for ${action} action`);
+      return true;
     }
-
-
-    fetchDocuments();
+    return false;
   } catch (error) {
-    console.error(`Error performing ${action} on document:`, error);
-    setMessage({ type: 'error', content: `Failed to ${action} document` });
+    console.error('Error sending email:', error);
+    throw error;
   }
 };
+
+
+  const handleAction = async (id, action) => {
+    setIsLoading(true);
+    try {
+      let doc;
+      if (action === 'approve') {
+        // Get document info first
+        const docResponse = await axios.get(`${API_BASE_URL}/pdfs/${id}`);
+        doc = docResponse.data;
+
+        // Update document approval status
+        const response = await axios.put(`${API_BASE_URL}/pdfs/${id}`, { 
+          approval: true 
+        });
+
+        if (response.status === 200) {
+          // Send email notification
+          const emailSent = await sendEmailNotification('approve', doc);
+          
+          setMessage({ 
+            type: 'success', 
+            content: `Document approved successfully${emailSent ? ' and notification sent' : ''}` 
+          });
+        }
+      } else if (action === 'reject') {
+        // Get document info before deletion
+        const getResponse = await axios.get(`${API_BASE_URL}/pdfs/${id}`);
+        doc = getResponse.data;
+
+        // Send email notification before deletion
+        const emailSent = await sendEmailNotification('reject', doc);
+
+        // Delete the document
+        const deleteResponse = await axios.delete(`${API_BASE_URL}/pdfs/${id}`);
+        if (deleteResponse.status === 200) {
+          setMessage({ 
+            type: 'success', 
+            content: `Document rejected and deleted successfully${emailSent ? ' and notification sent' : ''}` 
+          });
+        }
+      }
+
+      fetchDocuments();
+    } catch (error) {
+      console.error(`Error performing ${action} on document:`, error);
+      setMessage({ 
+        type: 'error', 
+        content: `Failed to ${action} document: ${error.message}` 
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
 
 
 
   const viewPdf = async (pdfLink) => {
-    const baseUrl = 'http://192.168.10.30:5000/';
+    const baseUrl = 'http://192.168.10.227:5000/';
     await window.open(`${baseUrl}${pdfLink}`, '_blank');
   };
 

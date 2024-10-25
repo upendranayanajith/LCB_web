@@ -21,7 +21,7 @@ export default defineConfig({
   },
 
   server: {
-    host:'192.168.10.30',
+    host:'192.168.10.227',
     port: 443, // Set the desired port here
     strictPort: true, // Optional: prevents the server from starting if the port is already in use
   }

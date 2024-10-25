@@ -20,7 +20,7 @@ const PDFManagement = ({ isOpen, onClose }) => {
 
   const fetchPdfs = async () => {
     try {
-      const response = await axios.get('http://192.168.10.30:5000/api/pdfs');
+      const response = await axios.get('http://192.168.10.227:5000/api/pdfs');
       setPdfs(response.data);
     } catch (error) {
       console.error('Error fetching PDFs:', error);
@@ -29,7 +29,7 @@ const PDFManagement = ({ isOpen, onClose }) => {
 
   const fetchDepartments = async () => {
     try {
-      const response = await axios.get('http://192.168.10.30:5000/api/categories');
+      const response = await axios.get('http://192.168.10.227:5000/api/categories');
       setDepartments(response.data);
     } catch (error) {
       console.error('Error fetching departments:', error);
@@ -42,7 +42,7 @@ const PDFManagement = ({ isOpen, onClose }) => {
 
   const handleUpdate = async () => {
     try {
-      const response = await axios.put(`http://192.168.10.30:5000/api/pdfs/${editingPdf._id}`, editingPdf);
+      const response = await axios.put(`http://192.168.10.227:5000/api/pdfs/${editingPdf._id}`, editingPdf);
       if (response.status === 200) {
         setSuccessMessage('Details updated successfully!');
         setEditingPdf(null);
@@ -55,7 +55,7 @@ const PDFManagement = ({ isOpen, onClose }) => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await axios.delete(`http://192.168.10.30:5000/api/pdfs/${id}`);
+      const response = await axios.delete(`http://192.168.10.227:5000/api/pdfs/${id}`);
       if (response.status === 200) {
         setSuccessMessage('PDF deleted successfully!');
         fetchPdfs();
@@ -70,7 +70,7 @@ const PDFManagement = ({ isOpen, onClose }) => {
       const newStatus = !currentStatus; // Toggle the current status
 
       // Send the PUT request to the backend to update pdfStatus
-      await axios.put(`http://192.168.10.30:5000/api/pdfs/${id}`, {
+      await axios.put(`http://192.168.10.227:5000/api/pdfs/${id}`, {
         pdfStatus: newStatus, // Use pdfStatus instead of pdfstatus
       });
 
