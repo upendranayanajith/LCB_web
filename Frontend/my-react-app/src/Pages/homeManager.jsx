@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from "react";
-import { DollarSign } from 'lucide-react';
+import { BadgeDollarSign } from 'lucide-react';
 import Header from "../Components/headerManager.jsx";
 import Card from "../Components/card.jsx";
 import Footer from "../Components/footer.jsx";
@@ -21,11 +21,11 @@ import {
 const MoneyPattern = () => {
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 flex flex-wrap gap-8 p-2">
-        {Array.from({ length: 1000 }).map((_, i) => (
-          <DollarSign 
+      <div className="absolute inset-0 flex flex-wrap gap-4 p-2">
+        {Array.from({ length: 2000 }).map((_, i) => (
+          <BadgeDollarSign 
             key={i}
-            className={`w-8 h-8 opacity-20 transform ${
+            className={`w-6 h-6 opacity-15 transform ${
               i % 2 === 0 ? 'text-blue-500' : 'text-purple-500'
             }`}
             style={{
