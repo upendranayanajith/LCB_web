@@ -1,16 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from "react";
-import { DollarSign } from 'lucide-react';
+import { BadgeDollarSign } from 'lucide-react';
 import Header from "../Components/header.jsx";
 import Card from "../Components/card.jsx";
 import Footer from "../Components/footer.jsx";
-
 import applicationBg from "../assets/applications.svg";
 import policiesBg from "../assets/policies.svg";
 import tutorialsBg from "../assets/tuteorials.svg";
 import circularsBg from "../assets/circulars.svg";
-
 import {
   faFileLines,
   faFileShield,
@@ -21,11 +19,11 @@ import {
 const MoneyPattern = () => {
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 flex flex-wrap gap-8 p-2">
-        {Array.from({ length: 1000 }).map((_, i) => (
-          <DollarSign 
+      <div className="absolute inset-0 flex flex-wrap gap-6 p-2">
+        {Array.from({ length: 2000 }).map((_, i) => (
+          <BadgeDollarSign
             key={i}
-            className={`w-8 h-8 opacity-20 transform ${
+            className={`w-6 h-6 opacity-15 transform ${
               i % 2 === 0 ? 'text-blue-500' : 'text-purple-500'
             }`}
             style={{
